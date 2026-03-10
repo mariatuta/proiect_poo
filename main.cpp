@@ -34,7 +34,7 @@ private:
     std::string model;
 
 public:
-    Aeroplane(Point h, Direction d, std::string m) : head(h), dir(d), model(m) {}
+    Aeroplane(Point h, Direction d, const std::string& m) : head(h), dir(d), model(m) {}
 
     //calculam matematic toate cele 10 puncte ale avionului
     std::vector<Point> getBodyPoints() const {
@@ -252,7 +252,7 @@ private:
 
 public:
     // Constructor cu parametri
-    Game(std::string name) : projectName(name), playerPlanesAlive(3), aiPlanesAlive(3) {}
+    explicit Game(std::string name) : projectName(name), playerPlanesAlive(3), aiPlanesAlive(3) {}
 
     // crearea boardului cu avioanele jucatorului
     void setupPlayerBoard() {
