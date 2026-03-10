@@ -1,12 +1,8 @@
-# Nu primesc notă pentru că nu am pus titlu și descriere
+# PaperSkyTactics
 
-### Folosiți template-ul corespunzător grupei voastre!
+### Description
 
-| Laborant  | Link template                                |
-|-----------|----------------------------------------------|
-| Dragoș B  | https://github.com/Ionnier/oop-template      |
-| Tiberiu M | https://github.com/MaximTiberiu/oop-template |
-| Marius MC | https://github.com/mcmarius/oop-template     |
+PaperSkyTactics is a game that simulates the game of "planes on paper". Each player positions 3 planes on a 10x10 board, in one of the possible directions: north, south, west or east. The goal of the game is for one player to find all 3 "heads" of the other player's planes. Each player chooses, in turn, a cell on the game board. There are 3 possible outcomes: the cell is empty, it is a part of the plane's "body" or it is the "head" of the plane. If someone finds the "head" of a plane, the positioning of the entire plane will be shown.
 
 ### Important!
 
