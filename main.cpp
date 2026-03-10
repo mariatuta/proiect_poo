@@ -208,33 +208,33 @@ public:
     }
 };
 
-class AIPlayer {
-private:
-    Board myBoard;
-    bool hitMap[10][10]; // Ține minte unde a tras deja
+// class AIPlayer {
+// private:
+//     Board myBoard;
+//     bool hitMap[10][10]; // Ține minte unde a tras deja
+//
+// public:
+//     AIPlayer() {
+//         for(int i=0; i<10; ++i)
+//             for(int j=0; j<10; ++j) hitMap[i][j] = false;
+//         std::srand(std::time(0));
+//     }
+//
+//     Board& getBoard() { return myBoard; }
+//
+//     Point makeRandomMove() {
+//         int x, y;
+//         do {
+//             x = std::rand() % 10;
+//             y = std::rand() % 10;
+//         } while (hitMap[x][y]); // Caută un punct unde n-a mai tras
+//
+//         hitMap[x][y] = true;
+//         return Point(x, y);
+//     }
+// };
 
-public:
-    AIPlayer() {
-        for(int i=0; i<10; ++i)
-            for(int j=0; j<10; ++j) hitMap[i][j] = false;
-        std::srand(std::time(0));
-    }
-
-    Board& getBoard() { return myBoard; }
-
-    Point makeRandomMove() {
-        int x, y;
-        do {
-            x = std::rand() % 10;
-            y = std::rand() % 10;
-        } while (hitMap[x][y]); // Caută un punct unde n-a mai tras
-
-        hitMap[x][y] = true;
-        return Point(x, y);
-    }
-};
-
-// --- CLASA Game ---
+//--- CLASA Game ---
 
 class Game {
 private:
@@ -297,9 +297,8 @@ public:
 
     void startBattle() {
         std::cout << "\n=== START BATAIE: " << projectName << " ===\n";
-        bool gameOver = false;
 
-        while (!gameOver) {
+        while (true) {
 
             // --- PASUL 1: AFIȘARE TABLA TA (LA VEDERE) ---
             std::cout << "\nTABLA TA (Avioanele tale):\n";
@@ -345,7 +344,6 @@ public:
 
             if (aiPlanesAlive == 0) {
                 std::cout << "\nFELICITARI! Ai distrus toata flota inamica! Ai castigat.\n";
-                gameOver = true;
                 break;
             }
 
@@ -370,7 +368,7 @@ public:
 
             if (playerPlanesAlive == 0) {
                 std::cout << "\nDEFEAT! Toate avioanele tale au fost distruse.\n";
-                gameOver = true;
+                break;
             }
         }
     }
