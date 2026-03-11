@@ -12,7 +12,7 @@ private:
     int x, y;
 
 public:
-    Point(int x = 0, int y = 0) : x(x), y(y) {}
+    explicit Point(int x = 0, int y = 0) : x(x), y(y) {}
 
     int getX() const { return x; }
     int getY() const { return y; }
@@ -44,10 +44,10 @@ public:
         body.push_back(head);
 
         if (dir == Direction::NORTH) {
-            for (int i = 1; i <= 3; ++i) body.push_back({hx + i, hy}); // Corp central
-            body.push_back({hx + 1, hy - 1}); body.push_back({hx + 1, hy - 2}); // Aripi stanga
-            body.push_back({hx + 1, hy + 1}); body.push_back({hx + 1, hy + 2}); // Aripi dreapta
-            body.push_back({hx + 3, hy - 1}); body.push_back({hx + 3, hy + 1}); // Coada
+            for (int i = 1; i <= 3; ++i) body.push_back(Point(hx + i, hy)); // Corp central
+            body.push_back(Point{hx + 1, hy - 1}); body.push_back(Point{hx + 1, hy - 2}); // Aripi stanga
+            body.push_back(Point{hx + 1, hy + 1}); body.push_back(Point{hx + 1, hy + 2}); // Aripi dreapta
+            body.push_back(Point{hx + 3, hy - 1}); body.push_back(Point{hx + 3, hy + 1}); // Coada
         }
         else if (dir == Direction::SOUTH) {
             for (int i = 1; i <= 3; ++i) body.push_back(Point(hx - i, hy));
@@ -244,8 +244,7 @@ private:
     int playerPlanesAlive;
     int aiPlanesAlive;
 
-    // Metodă privată pentru a curăța buffer-ul de input (utilă la citiri)
-    void clearInput() {
+    static void clearInput() {
         std::cin.clear();
         std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
     }
@@ -394,7 +393,7 @@ int main() {
 
 #include <iostream>
 #include <array>
-#include "include/Example.h"
+// #include "include/Example.h"
 // This also works if you do not want `include/`, but some editors might not like it
 // #include "Example.h"
 
