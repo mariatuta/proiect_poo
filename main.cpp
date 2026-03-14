@@ -9,7 +9,7 @@
 // --- CLASA 1: Point ---
 class Point {
 private:
-    int x, y;
+    int x=0, y=0;
 
 public:
     explicit Point(int x = 0, int y = 0) : x(x), y(y) {}
@@ -25,56 +25,82 @@ public:
 };
 
 // --- CLASA 2: Aeroplane ---
+enum class PlaneType { INTERCEPTOR, BOMBER };
 enum class Direction { NORTH, SOUTH, EAST, WEST };
 
 class Aeroplane {
 private:
     Point head;
-    Direction dir;
-    std::string model;
+    Direction dir = Direction::NORTH;
+    PlaneType type = PlaneType::BOMBER;
 
 public:
-    Aeroplane(Point h, Direction d, const std::string& m) : head(h), dir(d), model(m) {}
-
-    //calculam matematic toate cele 10 puncte ale avionului
+    Aeroplane(Point h, Direction d, PlaneType t) : head(h), dir(d), type(t) {}
+    //calculam matematic toate cele 10 puncte ale bomber-ului sau cele 6 ale interceptor-ului
     std::vector<Point> getBodyPoints() const {
         std::vector<Point> body;
         int hx = head.getX();
         int hy = head.getY();
-        body.push_back(head);
 
-        if (dir == Direction::NORTH) {
-            for (int i = 1; i <= 3; ++i) body.push_back(Point(hx + i, hy)); // Corp central
-            body.push_back(Point{hx + 1, hy - 1}); body.push_back(Point{hx + 1, hy - 2}); // Aripi stanga
-            body.push_back(Point{hx + 1, hy + 1}); body.push_back(Point{hx + 1, hy + 2}); // Aripi dreapta
-            body.push_back(Point{hx + 3, hy - 1}); body.push_back(Point{hx + 3, hy + 1}); // Coada
+        if (type == PlaneType::BOMBER) {
+            if (dir == Direction::NORTH) {
+                for (int i = 1; i <= 3; ++i) body.emplace_back(hx + i, hy); // Corp central
+                body.emplace_back(hx + 1, hy - 1); body.emplace_back(hx + 1, hy - 2); // Aripi stanga
+                body.emplace_back(hx + 1, hy + 1); body.emplace_back(hx + 1, hy + 2); // Aripi dreapta
+                body.emplace_back(hx + 3, hy - 1); body.emplace_back(hx + 3, hy + 1); // Coada
+            }
+            else if (dir == Direction::SOUTH) {
+                for (int i = 1; i <= 3; ++i) body.emplace_back(hx - i, hy);
+                body.emplace_back(hx - 1, hy - 1); body.emplace_back(hx - 1, hy - 2);
+                body.emplace_back(hx - 1, hy + 1); body.emplace_back(hx - 1, hy + 2);
+                body.emplace_back(hx - 3, hy - 1); body.emplace_back(hx - 3, hy + 1);
+            }
+            else if (dir == Direction::EAST) {
+                for (int j = 1; j <= 3; ++j) body.emplace_back(hx, hy - j);
+                body.emplace_back(hx - 1, hy - 1); body.emplace_back(hx - 2, hy - 1);
+                body.emplace_back(hx + 1, hy - 1); body.emplace_back(hx + 2, hy - 1);
+                body.emplace_back(hx - 1, hy - 3); body.emplace_back(hx + 1, hy - 3);
+            }
+            else if (dir == Direction::WEST) {
+                for (int j = 1; j <= 3; ++j) body.emplace_back(hx, hy + j);
+                body.emplace_back(hx - 1, hy + 1); body.emplace_back(hx - 2, hy + 1);
+                body.emplace_back(hx + 1, hy + 1); body.emplace_back(hx + 2, hy + 1);
+                body.emplace_back(hx - 1, hy + 3); body.emplace_back(hx + 1, hy + 3);
+            }
+        }else {
+            if (dir == Direction::NORTH) {
+                body.emplace_back(hx + 1, hy); // Corp central
+                body.emplace_back(hx + 1, hy - 1); // Aripi stanga
+                body.emplace_back(hx + 1, hy + 1); // Aripi dreapta
+                body.emplace_back(hx + 2, hy); body.emplace_back(hx + 3, hy);// Coada
+            }
+            else if (dir == Direction::SOUTH) {
+                body.emplace_back(hx - 1, hy);
+                body.emplace_back(hx - 1, hy - 1);
+                body.emplace_back(hx - 1, hy + 1);
+                body.emplace_back(hx - 2, hy); body.emplace_back(hx - 3, hy);
+            }
+            else if (dir == Direction::EAST) {
+                body.emplace_back(hx, hy - 1);
+                body.emplace_back(hx - 1, hy - 1);
+                body.emplace_back(hx + 1, hy - 1);
+                body.emplace_back(hx, hy - 2); body.emplace_back(hx, hy - 3);
+            }
+            else if (dir == Direction::WEST) {
+                body.emplace_back(hx, hy + 1);
+                body.emplace_back(hx - 1, hy + 1);
+                body.emplace_back(hx + 1, hy + 1);
+                body.emplace_back(hx, hy + 2); body.emplace_back(hx, hy + 3);
+            }
+            }
+            return body;
         }
-        else if (dir == Direction::SOUTH) {
-            for (int i = 1; i <= 3; ++i) body.push_back(Point(hx - i, hy));
-            body.push_back(Point(hx - 1, hy - 1)); body.push_back(Point(hx - 1, hy - 2));
-            body.push_back(Point(hx - 1, hy + 1)); body.push_back(Point(hx - 1, hy + 2));
-            body.push_back(Point(hx - 3, hy - 1)); body.push_back(Point(hx - 3, hy + 1));
-        }
-        else if (dir == Direction::EAST) {
-            for (int j = 1; j <= 3; ++j) body.push_back(Point(hx, hy - j));
-            body.push_back(Point(hx - 1, hy - 1)); body.push_back(Point(hx - 2, hy - 1));
-            body.push_back(Point(hx + 1, hy - 1)); body.push_back(Point(hx + 2, hy - 1));
-            body.push_back(Point(hx - 1, hy - 3)); body.push_back(Point(hx + 1, hy - 3));
-        }
-        else if (dir == Direction::WEST) {
-            for (int j = 1; j <= 3; ++j) body.push_back(Point(hx, hy + j));
-            body.push_back(Point(hx - 1, hy + 1)); body.push_back(Point(hx - 2, hy + 1));
-            body.push_back(Point(hx + 1, hy + 1)); body.push_back(Point(hx + 2, hy + 1));
-            body.push_back(Point(hx - 1, hy + 3)); body.push_back(Point(hx + 1, hy + 3));
-        }
-        return body;
-    }
 
     Point getHead() const { return head; }
 
     // Operator << pentru Aeroplane
     friend std::ostream& operator<<(std::ostream& os, const Aeroplane& a) {
-        os << "Avion [" << a.model << "] cu capul la " << a.head;
+        os << "Avion [" << (a.type == PlaneType::BOMBER ? "Bombardier" : "Interceptor") << "] cu capul la " << a.head;
         return os;
     }
 };
@@ -85,7 +111,7 @@ enum class AttackResult { MISS, HIT_BODY, HIT_HEAD, ALREADY_SHOT, INVALID_COORD 
 
 class Board {
 private:
-    static const int SIZE = 10;
+    static constexpr int SIZE = 10;
     int** grid; // 0=Celula goala, 1=Corp, 2=Cap, 3=Lovit(Corp), 4=Ratat(Celula goala), 5=Distrus(Cap)
     std::vector<Aeroplane> planes; // Compunere
 
@@ -99,7 +125,7 @@ public:
     }
 
     // ---Constructor de copiere ---
-    Board(const Board& other) {
+    Board(const Board& other) : planes(other.planes){
         grid = new int*[SIZE];
         for (int i = 0; i < SIZE; ++i) {
             grid[i] = new int[SIZE];
@@ -113,6 +139,7 @@ public:
         if (this != &other) {
             for (int i = 0; i < SIZE; ++i) delete[] grid[i];
             delete[] grid;
+            grid = nullptr;
 
             grid = new int*[SIZE];
             for (int i = 0; i < SIZE; ++i) {
@@ -133,13 +160,13 @@ public:
     // --- validare și plasare ---
     bool validateAndPlace(const Aeroplane& a) {
         std::vector<Point> pts = a.getBodyPoints();
+        Point head = a.getHead();
+        pts.emplace_back(head.getX(), head.getY());
 
         for (const auto& p : pts) {
             if (p.getX() < 0 || p.getX() >= SIZE || p.getY() < 0 || p.getY() >= SIZE) return false;
             if (grid[p.getX()][p.getY()] != 0) return false;
         }
-
-        Point head = a.getHead();
         for (const auto& p : pts) {
             if (p.getX() == head.getX() && p.getY() == head.getY())
                 grid[p.getX()][p.getY()] = 2; // cap
@@ -251,23 +278,40 @@ private:
 
 public:
     // Constructor cu parametri
-    explicit Game(std::string name) : projectName(name), playerPlanesAlive(3), aiPlanesAlive(3) {}
+    explicit Game(const std::string& name) : projectName(name), playerPlanesAlive(3), aiPlanesAlive(3) {}
+
+    // Logica AI-ului de a-și plasa singur avioanele (Random)
+    void setupAIBoard(PlaneType typeToMatch) {
+        int count = 0;
+        while (count < 3) {
+            if (aiBoard.validateAndPlace(Aeroplane(Point(rand()%10, rand()%10), static_cast<Direction>(rand()%4), typeToMatch)))
+                count++;
+        }
+        std::cout << "AI-ul si-a pregatit flota simetrica.\n";
+    }
 
     // crearea boardului cu avioanele jucatorului
     void setupPlayerBoard() {
         std::cout << "--- Configurare Flota Jucator (3 Avioane) ---\n";
         int count = 0;
+        PlaneType chosenType = PlaneType::BOMBER;
+
         while (count < 3) {
-            int x, y, d;
+            int x, y, d, t;
+            if (count == 0) {
+                std::cout << "Alege tipul flotei pentru acest meci (0: Interceptor, 1: Bombardier): ";
+                std::cin >> t;
+                chosenType = static_cast<PlaneType>(t);
+            }
+
             std::cout << "Avion " << count + 1 << " - Introdu Cap (x y) si Directie (0:N, 1:S, 2:E, 3:W): ";
             if (!(std::cin >> x >> y >> d)) {
-                std::cout << "Input invalid! Reincearca.\n";
                 clearInput();
                 continue;
             }
 
             Direction dir = static_cast<Direction>(d);
-            Aeroplane a(Point(x, y), dir, "PlayerShip");
+            Aeroplane a(Point(x, y), dir, chosenType);
 
             if (playerBoard.validateAndPlace(a)) {
                 std::cout << "Avion plasat cu succes!\n";
@@ -276,28 +320,14 @@ public:
                 std::cout << "Pozitie invalida sau suprapunere! Incearca din nou.\n";
             }
         }
+        setupAIBoard(chosenType);
     }
 
-    // Logica AI-ului de a-și plasa singur avioanele (Random)
-    void setupAIBoard() {
-        int count = 0;
-        while (count < 3) {
-            int x = rand() % 10;
-            int y = rand() % 10;
-            Direction d = static_cast<Direction>(rand() % 4);
-            Aeroplane a(Point(x, y), d, "AIShip");
-
-            if (aiBoard.validateAndPlace(a)) {
-                count++;
-            }
-        }
-        std::cout << "AI-ul si-a configurat flota.\n";
-    }
 
     void startBattle() {
         std::cout << "\n=== START BATAIE: " << projectName << " ===\n";
 
-        while (true) {
+        while (playerPlanesAlive > 0 && aiPlanesAlive > 0) {
 
             // --- PASUL 1: AFIȘARE TABLA TA (LA VEDERE) ---
             std::cout << "\nTABLA TA (Avioanele tale):\n";
@@ -336,7 +366,7 @@ public:
                     } else if (res == AttackResult::HIT_BODY) {
                         std::cout << ">>> Lovit in corp!\n";
                     } else if (res == AttackResult::MISS) {
-                        std::cout << ">>> Apa.\n";
+                        std::cout << ">>> Nimic. Mai incerca.\n";
                     }
                 }
             } while (!validTurn); // Repeta pana cand jucatorul face o miscare valida
@@ -367,7 +397,7 @@ public:
 
             if (playerPlanesAlive == 0) {
                 std::cout << "\nDEFEAT! Toate avioanele tale au fost distruse.\n";
-                break;
+                return;
             }
         }
     }
@@ -380,10 +410,8 @@ public:
 };
 
 int main() {
-    srand(time(0)); // Pentru randomizare reală
+    srand(static_cast<unsigned>(time(nullptr))); // Pentru randomizare reală
     Game myGame("PaperSkyTactics - Battle Simulator");
-
-    myGame.setupAIBoard();     // AI-ul se pregătește
     myGame.setupPlayerBoard(); // Tu îți pui avioanele
     myGame.startBattle();      // Începe jocul propriu-zis
 
@@ -391,8 +419,9 @@ int main() {
 }
 
 
-#include <iostream>
-#include <array>
+
+// #include <iostream>
+// #include <array>
 // #include "include/Example.h"
 // This also works if you do not want `include/`, but some editors might not like it
 // #include "Example.h"
