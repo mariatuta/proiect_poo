@@ -147,7 +147,7 @@ public:
     }
 
     // --- Operator= ---
-    Board &operator=(const Board& other) {
+    Board &operator=(const Board &other) {
         if (this != &other) {
             for (int i = 0; i < SIZE; ++i) delete[] grid[i];
             delete[] grid;
@@ -310,14 +310,15 @@ public:
         PlaneType chosenType = PlaneType::BOMBER;
 
         while (count < 3) {
-            int x, y, d, t;
             if (count == 0) {
                 std::cout << "Alege tipul flotei pentru acest meci (0: Interceptor, 1: Bombardier): ";
+                int t;
                 std::cin >> t;
                 chosenType = static_cast<PlaneType>(t);
             }
 
             std::cout << "Avion " << count + 1 << " - Introdu Cap (x y) si Directie (0:N, 1:S, 2:E, 3:W): ";
+            int x,y,d;
             if (!(std::cin >> x >> y >> d)) {
                 clearInput();
                 continue;
