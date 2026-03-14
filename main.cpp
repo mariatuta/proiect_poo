@@ -9,7 +9,7 @@
 // --- CLASA 1: Point ---
 class Point {
 private:
-    int x=0, y=0;
+    int x = 0, y = 0;
 
 public:
     explicit Point(int x = 0, int y = 0) : x(x), y(y) {}
@@ -35,7 +35,9 @@ private:
     PlaneType type = PlaneType::BOMBER;
 
 public:
-    Aeroplane(Point h, Direction d, PlaneType t) : head(h), dir(d), type(t) {}
+    Aeroplane(Point h, Direction d, PlaneType t) : head(h), dir(d), type(t) {
+    }
+
     //calculam matematic toate cele 10 puncte ale bomber-ului sau cele 6 ale interceptor-ului
     std::vector<Point> getBodyPoints() const {
         std::vector<Point> body;
@@ -45,56 +47,66 @@ public:
         if (type == PlaneType::BOMBER) {
             if (dir == Direction::NORTH) {
                 for (int i = 1; i <= 3; ++i) body.emplace_back(hx + i, hy); // Corp central
-                body.emplace_back(hx + 1, hy - 1); body.emplace_back(hx + 1, hy - 2); // Aripi stanga
-                body.emplace_back(hx + 1, hy + 1); body.emplace_back(hx + 1, hy + 2); // Aripi dreapta
-                body.emplace_back(hx + 3, hy - 1); body.emplace_back(hx + 3, hy + 1); // Coada
-            }
-            else if (dir == Direction::SOUTH) {
+                body.emplace_back(hx + 1, hy - 1);
+                body.emplace_back(hx + 1, hy - 2); // Aripi stanga
+                body.emplace_back(hx + 1, hy + 1);
+                body.emplace_back(hx + 1, hy + 2); // Aripi dreapta
+                body.emplace_back(hx + 3, hy - 1);
+                body.emplace_back(hx + 3, hy + 1); // Coada
+            } else if (dir == Direction::SOUTH) {
                 for (int i = 1; i <= 3; ++i) body.emplace_back(hx - i, hy);
-                body.emplace_back(hx - 1, hy - 1); body.emplace_back(hx - 1, hy - 2);
-                body.emplace_back(hx - 1, hy + 1); body.emplace_back(hx - 1, hy + 2);
-                body.emplace_back(hx - 3, hy - 1); body.emplace_back(hx - 3, hy + 1);
-            }
-            else if (dir == Direction::EAST) {
+                body.emplace_back(hx - 1, hy - 1);
+                body.emplace_back(hx - 1, hy - 2);
+                body.emplace_back(hx - 1, hy + 1);
+                body.emplace_back(hx - 1, hy + 2);
+                body.emplace_back(hx - 3, hy - 1);
+                body.emplace_back(hx - 3, hy + 1);
+            } else if (dir == Direction::EAST) {
                 for (int j = 1; j <= 3; ++j) body.emplace_back(hx, hy - j);
-                body.emplace_back(hx - 1, hy - 1); body.emplace_back(hx - 2, hy - 1);
-                body.emplace_back(hx + 1, hy - 1); body.emplace_back(hx + 2, hy - 1);
-                body.emplace_back(hx - 1, hy - 3); body.emplace_back(hx + 1, hy - 3);
-            }
-            else if (dir == Direction::WEST) {
+                body.emplace_back(hx - 1, hy - 1);
+                body.emplace_back(hx - 2, hy - 1);
+                body.emplace_back(hx + 1, hy - 1);
+                body.emplace_back(hx + 2, hy - 1);
+                body.emplace_back(hx - 1, hy - 3);
+                body.emplace_back(hx + 1, hy - 3);
+            } else if (dir == Direction::WEST) {
                 for (int j = 1; j <= 3; ++j) body.emplace_back(hx, hy + j);
-                body.emplace_back(hx - 1, hy + 1); body.emplace_back(hx - 2, hy + 1);
-                body.emplace_back(hx + 1, hy + 1); body.emplace_back(hx + 2, hy + 1);
-                body.emplace_back(hx - 1, hy + 3); body.emplace_back(hx + 1, hy + 3);
+                body.emplace_back(hx - 1, hy + 1);
+                body.emplace_back(hx - 2, hy + 1);
+                body.emplace_back(hx + 1, hy + 1);
+                body.emplace_back(hx + 2, hy + 1);
+                body.emplace_back(hx - 1, hy + 3);
+                body.emplace_back(hx + 1, hy + 3);
             }
-        }else {
+        } else {
             if (dir == Direction::NORTH) {
                 body.emplace_back(hx + 1, hy); // Corp central
                 body.emplace_back(hx + 1, hy - 1); // Aripi stanga
                 body.emplace_back(hx + 1, hy + 1); // Aripi dreapta
-                body.emplace_back(hx + 2, hy); body.emplace_back(hx + 3, hy);// Coada
-            }
-            else if (dir == Direction::SOUTH) {
+                body.emplace_back(hx + 2, hy);
+                body.emplace_back(hx + 3, hy); // Coada
+            } else if (dir == Direction::SOUTH) {
                 body.emplace_back(hx - 1, hy);
                 body.emplace_back(hx - 1, hy - 1);
                 body.emplace_back(hx - 1, hy + 1);
-                body.emplace_back(hx - 2, hy); body.emplace_back(hx - 3, hy);
-            }
-            else if (dir == Direction::EAST) {
+                body.emplace_back(hx - 2, hy);
+                body.emplace_back(hx - 3, hy);
+            } else if (dir == Direction::EAST) {
                 body.emplace_back(hx, hy - 1);
                 body.emplace_back(hx - 1, hy - 1);
                 body.emplace_back(hx + 1, hy - 1);
-                body.emplace_back(hx, hy - 2); body.emplace_back(hx, hy - 3);
-            }
-            else if (dir == Direction::WEST) {
+                body.emplace_back(hx, hy - 2);
+                body.emplace_back(hx, hy - 3);
+            } else if (dir == Direction::WEST) {
                 body.emplace_back(hx, hy + 1);
                 body.emplace_back(hx - 1, hy + 1);
                 body.emplace_back(hx + 1, hy + 1);
-                body.emplace_back(hx, hy + 2); body.emplace_back(hx, hy + 3);
+                body.emplace_back(hx, hy + 2);
+                body.emplace_back(hx, hy + 3);
             }
-            }
-            return body;
         }
+        return body;
+    }
 
     Point getHead() const { return head; }
 
@@ -118,7 +130,7 @@ private:
 public:
     // --- Constructor cu parametri ---
     Board() {
-        grid = new int*[SIZE];
+        grid = new int *[SIZE];
         for (int i = 0; i < SIZE; ++i) {
             grid[i] = new int[SIZE]{0};
         }
@@ -135,7 +147,7 @@ public:
     }
 
     // --- Operator= ---
-    Board& operator=(const Board& other) {
+    Board &operator=(const Board& other) {
         if (this != &other) {
             for (int i = 0; i < SIZE; ++i) delete[] grid[i];
             delete[] grid;
@@ -278,7 +290,8 @@ private:
 
 public:
     // Constructor cu parametri
-    explicit Game(const std::string& name) : projectName(name), playerPlanesAlive(3), aiPlanesAlive(3) {}
+    explicit Game(const std::string &name) : projectName(name), playerPlanesAlive(3), aiPlanesAlive(3) {
+    }
 
     // Logica AI-ului de a-și plasa singur avioanele (Random)
     void setupAIBoard(PlaneType typeToMatch) {
@@ -403,7 +416,7 @@ public:
     }
 
     // Operator <<
-    friend std::ostream& operator<<(std::ostream& os, const Game& g) {
+    friend std::ostream &operator<<(std::ostream &os, const Game &g) {
         os << "Joc: " << g.projectName << " | Status: In desfasurare\n";
         return os;
     }
