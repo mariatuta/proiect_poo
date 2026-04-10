@@ -24,9 +24,11 @@ public:
     }
 };
 
-// --- CLASA 2: Aeroplane ---
 enum class PlaneType { INTERCEPTOR, BOMBER };
 enum class Direction { NORTH, SOUTH, EAST, WEST };
+enum class Difficulty { EASY, ADVANCED };
+
+// --- CLASA 2: Aeroplane ---
 
 class Aeroplane {
 private:
@@ -137,27 +139,34 @@ public:
     }
 
     // ---Constructor de copiere ---
-    Board(const Board& other) : planes(other.planes){
+    Board(const Board& other) : planes(other.planes) {
         grid = new int*[SIZE];
         for (int i = 0; i < SIZE; ++i) {
             grid[i] = new int[SIZE];
-            for (int j = 0; j < SIZE; ++j) grid[i][j] = other.grid[i][j];
+            for (int j = 0; j < SIZE; ++j) {
+                grid[i][j] = other.grid[i][j];
+            }
         }
-        planes = other.planes;
     }
 
     // --- Operator= ---
     Board &operator=(const Board &other) {
         if (this != &other) {
-            for (int i = 0; i < SIZE; ++i) delete[] grid[i];
-            delete[] grid;
-            grid = nullptr;
-
-            grid = new int*[SIZE];
+            int** newGrid = new int*[SIZE];
             for (int i = 0; i < SIZE; ++i) {
-                grid[i] = new int[SIZE];
-                for (int j = 0; j < SIZE; ++j) grid[i][j] = other.grid[i][j];
+                newGrid[i] = new int[SIZE];
+                for (int j = 0; j < SIZE; ++j) {
+                    newGrid[i][j] = other.grid[i][j];
+                }
             }
+
+            //stergem vechiul grid doar dupa ce alocarea celui nou a reusit
+            for (int i = 0; i < SIZE; ++i) {
+                delete[] grid[i];
+            }
+            delete[] grid;
+
+            grid = newGrid;
             planes = other.planes;
         }
         return *this;
@@ -165,8 +174,17 @@ public:
 
     // --- Destructor ---
     ~Board() {
-        for (int i = 0; i < SIZE; ++i) delete[] grid[i];
+        for (int i = 0; i < SIZE; ++i) {
+            delete[] grid[i];
+        }
         delete[] grid;
+    }
+
+
+    int getCellValue(int r, int c) const {
+        if (r >= 0 && r < SIZE && c >= 0 && c < SIZE)
+            return grid[r][c];
+        return -1;
     }
 
     // --- validare și plasare ---
@@ -283,6 +301,11 @@ private:
     int playerPlanesAlive;
     int aiPlanesAlive;
 
+
+    Difficulty gameDifficulty = Difficulty::EASY;
+    bool huntingMode = false;
+    std::vector<Point> targetsToTry;
+
     static void clearInput() {
         std::cin.clear();
         std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
@@ -306,6 +329,15 @@ public:
     // crearea boardului cu avioanele jucatorului
     void setupPlayerBoard() {
         std::cout << "--- Configurare Flota Jucator (3 Avioane) ---\n";
+
+        std::cout << "Alege dificultatea AI (0: Incepator, 1: Avansat): ";
+        int diffChoice;
+        if (!(std::cin >> diffChoice)) {
+            clearInput();
+            diffChoice = 0;
+        }
+        gameDifficulty = (diffChoice == 1) ? Difficulty::ADVANCED : Difficulty::EASY;
+
         int count = 0;
         PlaneType chosenType = PlaneType::BOMBER;
 
@@ -318,7 +350,7 @@ public:
             }
 
             std::cout << "Avion " << count + 1 << " - Introdu Cap (x y) si Directie (0:N, 1:S, 2:E, 3:W): ";
-            int x,y,d;
+            int x, y, d;
             if (!(std::cin >> x >> y >> d)) {
                 clearInput();
                 continue;
@@ -337,6 +369,10 @@ public:
         setupAIBoard(chosenType);
     }
 
+    //am implementat nivel easy si advanced
+    //nivel easy= ai ul trage in celule random
+    //nivel avansat= daca nimereste ceva, huntingmode=true, si adauga cei 4 vecini în stiva
+    //o extrage pe ultima adaugata, si continua tot asa prin backtracking
 
     void startBattle() {
         std::cout << "\n=== START BATAIE: " << projectName << " ===\n";
@@ -379,7 +415,7 @@ public:
                         aiPlanesAlive--;
                     } else if (res == AttackResult::HIT_BODY) {
                         std::cout << ">>> Lovit in corp!\n";
-                    } else if (res == AttackResult::MISS) {
+                    } else{
                         std::cout << ">>> Nimic. Mai incerca.\n";
                     }
                 }
@@ -395,16 +431,49 @@ public:
             Point aiMove;
             AttackResult aiRes;
             do {
-                aiMove = Point(rand() % 10, rand() % 10);
+                if (gameDifficulty == Difficulty::ADVANCED && huntingMode && !targetsToTry.empty()) {
+                    aiMove = targetsToTry.back();
+                    targetsToTry.pop_back();
+                } else {
+                    aiMove = Point(rand() % 10, rand() % 10);
+                }
                 aiRes = playerBoard.receiveAttack(aiMove);
             } while (aiRes == AttackResult::ALREADY_SHOT || aiRes == AttackResult::INVALID_COORD);
 
             std::cout << "AI-ul a tras la " << aiMove << ": ";
-            if (aiRes == AttackResult::HIT_HEAD) {
+            if (aiRes == AttackResult::HIT_BODY) {
+                std::cout << "Lovit in corp!\n";
+                if (gameDifficulty == Difficulty::ADVANCED) {
+                    huntingMode = true;
+                    int x = aiMove.getX();
+                    int y = aiMove.getY();
+
+                    int dx[] = {-1, 1, 0, 0};
+                    int dy[] = {0, 0, -1, 1};
+
+                    for (int i = 0; i < 4; ++i) {
+                        int nx = x + dx[i];
+                        int ny = y + dy[i];
+
+                        //verific sa fie pe tabla
+                        if (nx >= 0 && nx < 10 && ny >= 0 && ny < 10) {
+
+                            int cellStatus = playerBoard.getCellValue(nx, ny);
+
+                            //verific sa nu fi fost atacata de ai deja
+                            if (cellStatus == 0 || cellStatus == 1 || cellStatus == 2) {
+                                targetsToTry.emplace_back(nx, ny);
+                            }
+                        }
+                    }
+                }
+            } else if (aiRes == AttackResult::HIT_HEAD) {
                 std::cout << "CRITICAL! Ti-a doborat un avion!\n";
                 playerPlanesAlive--;
-            } else if (aiRes == AttackResult::HIT_BODY) {
-                std::cout << "Lovit!\n";
+                if (gameDifficulty == Difficulty::ADVANCED) {
+                    huntingMode = false;
+                    targetsToTry.clear();
+                }
             } else {
                 std::cout << "Miss.\n";
             }
@@ -431,61 +500,3 @@ int main() {
 
     return 0;
 }
-
-
-
-// #include <iostream>
-// #include <array>
-// #include "include/Example.h"
-// This also works if you do not want `include/`, but some editors might not like it
-// #include "Example.h"
-
-// int main() {
-//     std::cout << "Hello, world!\n";
-//     Example e1;
-//     e1.g();
-//     std::array<int, 100> v{};
-//     int nr;
-//     std::cout << "Introduceți nr: ";
-    /////////////////////////////////////////////////////////////////////////
-    /// Observație: dacă aveți nevoie să citiți date de intrare de la tastatură,
-    /// dați exemple de date de intrare folosind fișierul tastatura.txt
-    /// Trebuie să aveți în fișierul tastatura.txt suficiente date de intrare
-    /// (în formatul impus de voi) astfel încât execuția programului să se încheie.
-    /// De asemenea, trebuie să adăugați în acest fișier date de intrare
-    /// pentru cât mai multe ramuri de execuție.
-    /// Dorim să facem acest lucru pentru a automatiza testarea codului, fără să
-    /// mai pierdem timp de fiecare dată să introducem de la zero aceleași date de intrare.
-    ///
-    /// Pe GitHub Actions (bife), fișierul tastatura.txt este folosit
-    /// pentru a simula date introduse de la tastatură.
-    /// Bifele verifică dacă programul are erori de compilare, erori de memorie și memory leaks.
-    ///
-    /// Dacă nu puneți în tastatura.txt suficiente date de intrare, îmi rezerv dreptul să vă
-    /// testez codul cu ce date de intrare am chef și să nu pun notă dacă găsesc vreun bug.
-    /// Impun această cerință ca să învățați să faceți un demo și să arătați părțile din
-    /// program care merg (și să le evitați pe cele care nu merg).
-    ///
-    /////////////////////////////////////////////////////////////////////////
-    // std::cin >> nr;
-    // /////////////////////////////////////////////////////////////////////////
-    // for(int i = 0; i < nr; ++i) {
-    //     std::cout << "v[" << i << "] = ";
-    //     std::cin >> v[i];
-    // }
-    // std::cout << "\n\n";
-    // std::cout << "Am citit de la tastatură " << nr << " elemente:\n";
-    // for(int i = 0; i < nr; ++i) {
-    //     std::cout << "- " << v[i] << "\n";
-    // }
-    ///////////////////////////////////////////////////////////////////////////
-    /// Pentru date citite din fișier, NU folosiți tastatura.txt. Creați-vă voi
-    /// alt fișier propriu cu ce alt nume doriți.
-    /// Exemplu:
-    /// std::ifstream fis("date.txt");
-    /// for(int i = 0; i < nr2; ++i)
-    ///     fis >> v2[i];
-    ///
-    ///////////////////////////////////////////////////////////////////////////
-//     return 0;
-// }
