@@ -139,7 +139,7 @@ public:
     }
 
     // ---Constructor de copiere ---
-    Board(const Board& other) : planes(other.planes) {
+    Board(const Board &other) : planes(other.planes) {
         grid = new int*[SIZE];
         for (int i = 0; i < SIZE; ++i) {
             grid[i] = new int[SIZE];
@@ -152,7 +152,7 @@ public:
     // --- Operator= ---
     Board &operator=(const Board &other) {
         if (this != &other) {
-            int** newGrid = new int*[SIZE];
+            int **newGrid = new int *[SIZE];
             for (int i = 0; i < SIZE; ++i) {
                 newGrid[i] = new int[SIZE];
                 for (int j = 0; j < SIZE; ++j) {
@@ -415,7 +415,7 @@ public:
                         aiPlanesAlive--;
                     } else if (res == AttackResult::HIT_BODY) {
                         std::cout << ">>> Lovit in corp!\n";
-                    } else{
+                    } else {
                         std::cout << ">>> Nimic. Mai incerca.\n";
                     }
                 }
@@ -448,8 +448,8 @@ public:
                     int x = aiMove.getX();
                     int y = aiMove.getY();
 
-                    int dx[] = {-1, 1, 0, 0};
-                    int dy[] = {0, 0, -1, 1};
+                    const int dx[] = {-1, 1, 0, 0};
+                    const int dy[] = {0, 0, -1, 1};
 
                     for (int i = 0; i < 4; ++i) {
                         int nx = x + dx[i];
@@ -457,7 +457,6 @@ public:
 
                         //verific sa fie pe tabla
                         if (nx >= 0 && nx < 10 && ny >= 0 && ny < 10) {
-
                             int cellStatus = playerBoard.getCellValue(nx, ny);
 
                             //verific sa nu fi fost atacata de ai deja
