@@ -180,9 +180,9 @@ public:
         delete[] grid;
     }
 
-    friend std::ostream& operator<<(std::ostream& os, const Board& b) {
+    friend std::ostream &operator<<(std::ostream &os, const Board &b) {
         int alive = 0;
-        for (const auto& plane : b.planes) {
+        for (const auto &plane: b.planes) {
             int hx = plane.getHead().getX();
             int hy = plane.getHead().getY();
 
