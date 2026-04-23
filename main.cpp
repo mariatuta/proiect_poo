@@ -180,6 +180,20 @@ public:
         delete[] grid;
     }
 
+    friend std::ostream& operator<<(std::ostream& os, const Board& b) {
+        int alive = 0;
+        for (const auto& plane : b.planes) {
+            int hx = plane.getHead().getX();
+            int hy = plane.getHead().getY();
+
+            //valoarea 2 inseamna ca este cap si este alive
+            if (b.grid[hx][hy] == 2) {
+                alive++;
+            }
+        }
+        os << "Flota activa: [" << alive << " avioane ramase pe campul de lupta]";
+        return os;
+    }
 
     int getCellValue(int r, int c) const {
         if (r >= 0 && r < SIZE && c >= 0 && c < SIZE)
@@ -258,11 +272,6 @@ public:
         std::cout << "  ---------------------\n";
     }
 
-    // operatorul <<
-    friend std::ostream& operator<<(std::ostream& os, const Board& b) {
-        os << "Board cu " << b.planes.size() << " avioane.";
-        return os;
-    }
 };
 
 // class AIPlayer {
@@ -382,12 +391,14 @@ public:
             // --- PASUL 1: AFIȘARE TABLA TA (LA VEDERE) ---
             std::cout << "\nTABLA TA (Avioanele tale):\n";
             playerBoard.display(false); //vezi ^ si #
-            std::cout << "Avioanele tale ramase: " << playerPlanesAlive << "\n";
+            //std::cout << "Avioanele tale ramase: " << playerPlanesAlive << "\n";
 
             // --- PASUL 2: AFIȘARE TABLA INAMICULUI ---
             std::cout << "\nTABLA INAMICULUI (Atacurile tale):\n";
             aiBoard.display(true); // vezi doar unde ai tras (O, X, !)
-            std::cout << "Avioane inamice ramase: " << aiPlanesAlive << "\n";
+            //std::cout << "Avioane inamice ramase: " << aiPlanesAlive << "\n";
+
+            std::cout << *this;
 
             // --- PASUL 3: RÂNDUL JUCĂTORULUI ---
             int tx, ty;
@@ -479,6 +490,7 @@ public:
 
             if (playerPlanesAlive == 0) {
                 std::cout << "\nDEFEAT! Toate avioanele tale au fost distruse.\n";
+                std::cout << "Iata unde era flota inamica:\n" << aiBoard << "\n";
                 return;
             }
         }
@@ -486,16 +498,18 @@ public:
 
     // Operator <<
     friend std::ostream &operator<<(std::ostream &os, const Game &g) {
-        os << "Joc: " << g.projectName << " | Status: In desfasurare\n";
+        os << "--- Status Joc: " << g.projectName << " ---\n";
+        os << " JUCATOR: " << g.playerBoard << "\n";
+        os << " INAMIC : " << g.aiBoard << "\n";
         return os;
     }
 };
 
 int main() {
     srand(static_cast<unsigned>(time(nullptr))); // Pentru randomizare reală
-    Game myGame("PaperSkyTactics - Battle Simulator");
-    myGame.setupPlayerBoard(); // Tu îți pui avioanele
-    myGame.startBattle();      // Începe jocul propriu-zis
-
+    Game myGame("PaperSkyTactics");
+    myGame.setupPlayerBoard();
+    std::cout << myGame << std::endl;
+    myGame.startBattle();
     return 0;
 }
