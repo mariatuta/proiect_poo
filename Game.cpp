@@ -220,6 +220,8 @@ void Game::startBattle() {
         // --- RÂNDUL AI-ULUI ---
         std::cout << "\nRandul inamicului...";
         Point aiMove;
+        int safetyCounter = 0; // Contor de siguranță anti-buclă infinită
+
         do {
             if (gameDifficulty == Difficulty::ADVANCED && huntingMode && !targetsToTry.empty()) {
                 aiMove = targetsToTry.back();
@@ -227,8 +229,26 @@ void Game::startBattle() {
             } else {
                 aiMove = Point(rand() % 10, rand() % 10);
             }
-        } while (playerBoard.isCellAlreadyAttacked(aiMove)); // Repetă dacă a mai tras acolo sau coordonata invalida
 
+            safetyCounter++;
+
+            // Dacă a încercat de prea multe ori la rând și nu a nimerit o celulă liberă
+            if (safetyCounter > 50) {
+                // Căutăm prima celulă neatacată de la (0,0) la (9,9)
+                bool foundBackup = false;
+                for (int i = 0; i < 10 && !foundBackup; ++i) {
+                    for (int j = 0; j < 10; ++j) {
+                        if (!playerBoard.isCellAlreadyAttacked(Point(i, j))) {
+                            aiMove = Point(i, j);
+                            foundBackup = true;
+                            break;
+                        }
+                    }
+                }
+                break;
+            }
+
+        } while (playerBoard.isCellAlreadyAttacked(aiMove));
         char aiRes = playerBoard.attackCell(aiMove);
         std::cout << "A tras la coordonatele " << aiMove << ": ";
         if (aiRes == 'X') {
