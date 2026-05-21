@@ -12,7 +12,8 @@
 class BomberPlane : public Aeroplane {
 public:
     // Apelăm constructorul clasei de bază (Cerință Etapa 2)
-    BomberPlane(Point h, Direction d) : Aeroplane(h, d) {}
+    BomberPlane(Point h, Direction d) : Aeroplane(h, d) {
+    }
 
     // Constructor virtual pentru deep copy (clone)
     std::unique_ptr<Aeroplane> clone() const override {

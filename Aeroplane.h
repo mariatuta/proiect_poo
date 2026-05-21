@@ -26,13 +26,13 @@ protected:
 public:
     Aeroplane(Point h, Direction d) : head(h), dir(d) {
         if (h.getX() < 0 || h.getX() >= 10 || h.getY() < 0 || h.getY() >= 10) {
-        throw std::out_of_range(">>> [Constructor Aeroplane] Capul avionului este in afara hartii!");
+            throw std::out_of_range(">>> [Constructor Aeroplane] Capul avionului este in afara hartii!");
         }
         totalPlanesCreated++; // Incrementăm contorul static la fiecare obiect nou
     }
 
     // Destructor virtual obligatoriu pentru clasele de bază polimorfice
-    virtual ~Aeroplane() {totalPlanesCreated--;}
+    virtual ~Aeroplane() { totalPlanesCreated--; }
 
     // Constructor virtual (clone)
     virtual std::unique_ptr<Aeroplane> clone() const = 0;
@@ -43,7 +43,7 @@ public:
     }
 
     Point getHead() const { return head; }
-    Direction getDirection() const { return dir; }
+    //Direction getDirection() const { return dir; }
 
     // Funcție statică obligatorie pentru a citi membrul static privat
     static int getTotalPlanesCreated() {

@@ -15,7 +15,8 @@ int Aeroplane::totalPlanesCreated = 0;
 // Constructorul clasei Game
 Game::Game(std::string name)
     : projectName(std::move(name)), playerPlanesAlive(3), aiPlanesAlive(3),
-      gameDifficulty(Difficulty::EASY), huntingMode(false) {}
+      gameDifficulty(Difficulty::EASY), huntingMode(false) {
+}
 
 void Game::clearInput() {
     std::cin.clear();
@@ -69,8 +70,7 @@ void Game::setupPlayerBoard() {
             else gameDifficulty = Difficulty::MEDIUM;
 
             dificultateValida = true;
-
-        } catch (const GameException& e) {
+        } catch (const GameException &e) {
             std::cout << e.what() << " Incearca din nou.\n\n";
         }
     } while (!dificultateValida);
@@ -84,11 +84,11 @@ void Game::setupPlayerBoard() {
             std::cout << "Alege tipul flotei pentru acest meci (0: Interceptor, 1: Bombardier, 2: Racheta): ";
             if (!(std::cin >> chosenType) || chosenType < 0 || chosenType > 2) {
                 clearInput();
-                throw InvalidCoordinatesException(">>> Optiune invalida pentru tipul flotei! Trebuie sa introduci 0, 1 sau 2.");
+                throw InvalidCoordinatesException(
+                    ">>> Optiune invalida pentru tipul flotei! Trebuie sa introduci 0, 1 sau 2.");
             }
             tipFlotaValid = true; // Dacă e corect, ieșim din buclă
-
-        } catch (const GameException& e) {
+        } catch (const GameException &e) {
             std::cout << e.what() << " Incearca din nou.\n\n";
         }
     } while (!tipFlotaValid);
@@ -101,7 +101,8 @@ void Game::setupPlayerBoard() {
             // Am unit verificarea de caractere și de margini ale hărții pentru x și y
             if (!(std::cin >> x >> y >> d) || x < 0 || x >= 10 || y < 0 || y >= 10) {
                 clearInput();
-                throw InvalidCoordinatesException(">>> Coordonate invalide! Introdu numere intregi intre 0 si 9 pentru x si y.");
+                throw InvalidCoordinatesException(
+                    ">>> Coordonate invalide! Introdu numere intregi intre 0 si 9 pentru x si y.");
             }
 
             // Verificăm separat direcția ca să dăm un mesaj precis
@@ -121,10 +122,10 @@ void Game::setupPlayerBoard() {
                 std::cout << "Avion plasat cu succes!\n\n";
                 count++;
             } else {
-                throw CellUnavailableException(">>> Pozitie invalida! Avionul iese din harta sau se suprapune cu altul.");
+                throw CellUnavailableException(
+                    ">>> Pozitie invalida! Avionul iese din harta sau se suprapune cu altul.");
             }
-
-        } catch (const GameException& e) {
+        } catch (const GameException &e) {
             std::cout << e.what() << " Reintrodu datele pentru acest avion.\n\n";
         }
     }
@@ -178,7 +179,8 @@ void Game::startBattle() {
                 // Am unit verificarea pentru litere și pentru margini în afara hărții (0-9)
                 if (!(std::cin >> tx >> ty) || tx < 0 || tx >= 10 || ty < 0 || ty >= 10) {
                     clearInput();
-                    throw InvalidCoordinatesException(">>> Coordonate invalide! Trebuie sa introduci numere intre 0 si 9.");
+                    throw InvalidCoordinatesException(
+                        ">>> Coordonate invalide! Trebuie sa introduci numere intre 0 si 9.");
                 }
 
                 // Verificăm dacă celula a fost deja atacată
@@ -201,12 +203,10 @@ void Game::startBattle() {
                     if (res == 'B') std::cout << "BOMBARDIER inamic.\n";
                     else if (res == 'R') std::cout << "RACHETA inamic.\n";
                     else if (res == 'I') std::cout << "INTERCEPTOR inamic.\n";
-
                 }
 
                 validTurn = true; // Tura s-a terminat cu succes, ieșim din do-while
-
-            } catch (const GameException& e) {
+            } catch (const GameException &e) {
                 std::cout << e.what() << " Incearca din nou.\n";
                 // validTurn rămâne false, deci bucla reia introducerea datelor
             }

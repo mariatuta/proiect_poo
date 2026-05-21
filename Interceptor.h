@@ -10,7 +10,8 @@
 
 class InterceptorPlane : public Aeroplane {
 public:
-    InterceptorPlane(Point h, Direction d) : Aeroplane(h, d) {}
+    InterceptorPlane(Point h, Direction d) : Aeroplane(h, d) {
+    }
 
     std::unique_ptr<Aeroplane> clone() const override {
         return std::make_unique<InterceptorPlane>(*this);

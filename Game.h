@@ -14,25 +14,29 @@
 // 1. Clasa de bază
 class GameException : public std::runtime_error {
 public:
-    explicit GameException(const std::string& message) : std::runtime_error(message) {}
+    explicit GameException(const std::string &message) : std::runtime_error(message) {
+    }
 };
 
 // 2. Pentru orice introducere greșită de coordonate (Configurare + Luptă)
 class InvalidCoordinatesException : public GameException {
 public:
-    explicit InvalidCoordinatesException(const std::string& message) : GameException(message) {}
+    explicit InvalidCoordinatesException(const std::string &message) : GameException(message) {
+    }
 };
 
 // 3. Pentru o direcție care nu este între 0 și 3 (Configurare)
 class InvalidDirectionException : public GameException {
 public:
-    explicit InvalidDirectionException(const std::string& message) : GameException(message) {}
+    explicit InvalidDirectionException(const std::string &message) : GameException(message) {
+    }
 };
 
 // 4. Pentru celule indisponibile (Ocupate la configurare sau Deja Atacate la luptă)
 class CellUnavailableException : public GameException {
 public:
-    explicit CellUnavailableException(const std::string& message) : GameException(message) {}
+    explicit CellUnavailableException(const std::string &message) : GameException(message) {
+    }
 };
 
 enum class Difficulty { EASY, MEDIUM, ADVANCED };
@@ -51,6 +55,7 @@ private:
 
     // Funcții utilitare interne privatizate
     static void clearInput();
+
     void setupAIBoard(int typeChoice);
 
 public:

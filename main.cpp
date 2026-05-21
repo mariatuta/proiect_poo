@@ -9,13 +9,11 @@ int main() {
         Game myGame("PaperSkyTactics");
         myGame.setupPlayerBoard();
         myGame.startBattle();
-    }
-    catch (const GameException& e) {
+    } catch (const GameException &e) {
         std::cout << "[EROARE CRITICA PRINSA IN MAIN]:\n";
         std::cout << e.what() << "\n";
         return 1;
-    }
-    catch (const std::exception& e) {
+    } catch (const std::exception &e) {
         std::cout << "\n[EROARE SISTEM]: " << e.what() << "\n";
         return 2;
     }

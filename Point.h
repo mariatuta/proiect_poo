@@ -18,10 +18,11 @@ public:
 
     // Getteri marcați cu const
     int getX() const;
+
     int getY() const;
 
     // Operatorul << definit inline
-    friend std::ostream& operator<<(std::ostream& os, const Point& p) {
+    friend std::ostream &operator<<(std::ostream &os, const Point &p) {
         os << "(" << p.x << "," << p.y << ")";
         return os;
     }
