@@ -1,7 +1,7 @@
-#include "Board.h"
+#include "../include/Board.h"
 #include "Bomber.h"       // Adaugă asta!
-#include "Interceptor.h"
-#include "Rocket.h"
+#include "../include/Interceptor.h"
+#include "../include/Rocket.h"
 #include <iostream>
 #include <algorithm>
 #include <utility> // Obligatoriu pentru std::swap pe unique_ptr
@@ -80,18 +80,15 @@ char Board::attackCell(const Point &p) {
         // Căutăm avionul doborât în vectorul de avioane
         for (const auto &plane: planes) {
             if (plane && plane->getHead().getX() == x && plane->getHead().getY() == y) {
-                // 1. DYNAMIC_CAST pt aflarea tipului de avion
-                Aeroplane *rawPtr = plane.get();
-                if (dynamic_cast<BomberPlane *>(rawPtr)) tipAvion = 'B';
-                else if (dynamic_cast<RocketPlane *>(rawPtr)) tipAvion = 'R';
-                else if (dynamic_cast<InterceptorPlane *>(rawPtr)) tipAvion = 'I';
-
-                // descoperim automat corpul avionului mort pe tabla
-                // luam pct avionului NVI
                 std::vector<Point> corpAvion = plane->getBodyPoints();
-                for (const auto &punctCorp: corpAvion) {
-                    // Marcăm pe grilă cu '#' celulele corpului acestui avion mort
+                for (const auto& punctCorp : corpAvion) {
                     grid[punctCorp.getX()][punctCorp.getY()] = '#';
+                }
+
+                // DYNAMIC_CAST doar pt Bombardier
+                Aeroplane* rawPtr = plane.get();
+                if (dynamic_cast<BomberPlane*>(rawPtr)) {
+                    return 'B'; // Returnăm semnal specific doar pentru Bombardier
                 }
 
                 break;

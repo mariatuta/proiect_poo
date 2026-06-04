@@ -2,7 +2,7 @@
 // Created by Maria Tuta on 20.05.2026.
 //
 
-#include "Bomber.h"
+#include "../include/Bomber.h"
 
 std::vector<Point> BomberPlane::calculateShapePoints() const {
     std::vector<Point> body;

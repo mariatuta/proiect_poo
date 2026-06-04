@@ -3,14 +3,14 @@
 //
 
 #include "Game.h"
-#include "Bomber.h"
-#include "Interceptor.h"
+#include "../include/Bomber.h"
+#include "../include/Interceptor.h"
 #include "Rocket.h"
 #include <iostream>
 #include <limits>
 //#include <cstdlib>
 
-int Aeroplane::totalPlanesCreated = 0;
+//int Aeroplane::totalPlanesCreated = 0;
 
 // Constructorul clasei Game
 Game::Game(std::string name)
@@ -52,81 +52,71 @@ void Game::setupAIBoard(int typeChoice) {
 // Configurarea flotei jucătorului uman
 void Game::setupPlayerBoard() {
     std::cout << "--- Configurare Flota Jucator (3 Avioane) ---\n";
-    //std::cout << "Alege dificultatea (0: Incepator, 1: Avansat): ";
 
+    // 1. Validare Meniu Dificultate prin IF-ELSE clasic
     bool dificultateValida = false;
     do {
-        try {
-            std::cout << "Alege dificultatea (0: Easy, 1: Medium, 2: Advanced): ";
-            int diffChoice;
+        std::cout << "Alege dificultatea (0: Easy, 1: Medium, 2: Advanced): ";
+        int diffChoice;
 
-            if (!(std::cin >> diffChoice) || diffChoice < 0 || diffChoice > 2) {
-                clearInput();
-                throw InvalidCoordinatesException(">>> Optiune invalida pentru nivel! Introdu strict 0, 1 sau 2.");
-            }
-
+        if (!(std::cin >> diffChoice) || diffChoice < 0 || diffChoice > 2) {
+            std::cout << ">>> Optiune invalida pentru nivel! Introdu strict 0, 1 sau 2.\n\n";
+            clearInput();
+        } else {
             if (diffChoice == 0) gameDifficulty = Difficulty::EASY;
             else if (diffChoice == 2) gameDifficulty = Difficulty::ADVANCED;
             else gameDifficulty = Difficulty::MEDIUM;
-
             dificultateValida = true;
-        } catch (const GameException &e) {
-            std::cout << e.what() << " Incearca din nou.\n\n";
         }
     } while (!dificultateValida);
 
-    int count = 0;
-    int chosenType = 1; // Implicit Bombardier
-
+    // 2. Validare Meniu Tip Flotă prin IF-ELSE clasic
+    int chosenType = 1;
     bool tipFlotaValid = false;
     do {
-        try {
-            std::cout << "Alege tipul flotei pentru acest meci (0: Interceptor, 1: Bombardier, 2: Racheta): ";
-            if (!(std::cin >> chosenType) || chosenType < 0 || chosenType > 2) {
-                clearInput();
-                throw InvalidCoordinatesException(
-                    ">>> Optiune invalida pentru tipul flotei! Trebuie sa introduci 0, 1 sau 2.");
-            }
-            tipFlotaValid = true; // Dacă e corect, ieșim din buclă
-        } catch (const GameException &e) {
-            std::cout << e.what() << " Incearca din nou.\n\n";
+        std::cout << "Alege tipul flotei pentru acest meci (0: Interceptor, 1: Bombardier, 2: Racheta): ";
+        if (!(std::cin >> chosenType) || chosenType < 0 || chosenType > 2) {
+            std::cout << ">>> Optiune invalida pentru tipul flotei! Trebuie sa introduci 0, 1 sau 2.\n\n";
+            clearInput();
+        } else {
+            tipFlotaValid = true;
         }
     } while (!tipFlotaValid);
 
+    // 3. Validare Plasare Avioane prin IF-ELSE clasic
+    int count = 0;
     while (count < 3) {
-        try {
-            std::cout << "Avion " << count + 1 << " - Introdu Capul (x y) si Directia (0:N, 1:S, 2:E, 3:W): ";
-            int x, y, d;
+        std::cout << "Avion " << count + 1 << " - Introdu Capul (x y) si Directia (0:N, 1:S, 2:E, 3:W): ";
+        int x, y, d;
 
-            // Am unit verificarea de caractere și de margini ale hărții pentru x și y
-            if (!(std::cin >> x >> y >> d) || x < 0 || x >= 10 || y < 0 || y >= 10) {
-                clearInput();
-                throw InvalidCoordinatesException(
-                    ">>> Coordonate invalide! Introdu numere intregi intre 0 si 9 pentru x si y.");
-            }
+        if (!(std::cin >> x >> y >> d)) {
+            std::cout << ">>> Date invalide! Te rugam sa introduci doar numere intregi.\n\n";
+            clearInput();
+            continue;
+        }
 
-            // Verificăm separat direcția ca să dăm un mesaj precis
-            if (d < 0 || d > 3) {
-                throw InvalidDirectionException(">>> Directie invalida! Introdu un numar intre 0 si 3.");
-            }
+        if (x < 0 || x >= 10 || y < 0 || y >= 10) {
+            std::cout << ">>> Coordonate in afara hartii! Introdu numere intre 0 si 9 pentru x si y.\n\n";
+            continue;
+        }
 
-            auto dir = static_cast<Direction>(d);
-            std::unique_ptr<Aeroplane> a = nullptr;
+        if (d < 0 || d > 3) {
+            std::cout << ">>> Directie invalida! Introdu un numar intre 0 si 3.\n\n";
+            continue;
+        }
 
-            if (chosenType == 0) a = std::make_unique<InterceptorPlane>(Point(x, y), dir);
-            else if (chosenType == 1) a = std::make_unique<BomberPlane>(Point(x, y), dir);
-            else a = std::make_unique<RocketPlane>(Point(x, y), dir);
+        auto dir = static_cast<Direction>(d);
+        std::unique_ptr<Aeroplane> a = nullptr;
 
-            // Verificăm dacă se poate adăuga fizic pe tablă
-            if (playerBoard.addPlane(std::move(a))) {
-                std::cout << "Avion plasat cu succes!\n\n";
-                count++;
-            } else {
-                throw CellUnavailableException(
-                    ">>> Pozitie invalida! Avionul iese din harta sau se suprapune cu altul.");
-            }
-        } catch (const GameException &e) {
-            std::cout << e.what() << " Reintrodu datele pentru acest avion.\n\n";
+        if (chosenType == 0) a = std::make_unique<InterceptorPlane>(Point(x, y), dir);
+        else if (chosenType == 1) a = std::make_unique<BomberPlane>(Point(x, y), dir);
+        else a = std::make_unique<RocketPlane>(Point(x, y), dir);
+
+        if (playerBoard.addPlane(std::move(a))) {
+            std::cout << "Avion plasat cu succes!\n\n";
+            count++;
+        } else {
+            std::cout << ">>> Pozitie invalida! Avionul iese din harta sau se suprapune cu altul.\n\n";
         }
     }
     setupAIBoard(chosenType);
@@ -156,7 +146,7 @@ void Game::startBattle() {
     std::cout << "=========================================================================\n\n";
 
     if (Aeroplane::getTotalPlanesCreated() != 6) {
-        throw GameException("ERR-SECURE: Numarul total de avioane din memorie este invalid! Jocul nu poate incepe.");
+        throw FlotillaIncompleteException("Numarul total de avioane din memorie este invalid! Jocul nu poate incepe.");
     }
 
     while (playerPlanesAlive > 0 && aiPlanesAlive > 0) {
@@ -185,7 +175,8 @@ void Game::startBattle() {
 
                 // Verificăm dacă celula a fost deja atacată
                 if (aiBoard.isCellAlreadyAttacked(Point(tx, ty))) {
-                    throw CellUnavailableException(">>> Ai tras deja in aceasta casuta! Alege o celula neatacata.");
+                    std::cout << ">>> Ai tras deja in aceasta casuta! Alege o celula neatacata.\n";
+                    continue;
                 }
 
                 // Dacă codul a trecut de excepții, tragem!
@@ -195,14 +186,12 @@ void Game::startBattle() {
                     std::cout << ">>> Lovit in corp!\n";
                 } else if (res == 'O') {
                     std::cout << ">>> Miss. Mai incearca tura urmatoare.\n";
-                } else if (res == 'B' || res == 'R' || res == 'I' || res == '!') {
+                } else if (res == 'B' ||  res == '!') {
                     std::cout << ">>> CAP! Ai doborat un avion ";
                     aiPlanesAlive--;
 
                     // RAPORT RADAR DYNAMIC_CAST - DOAR PE MODUL EASY
                     if (res == 'B') std::cout << "BOMBARDIER inamic.\n";
-                    else if (res == 'R') std::cout << "RACHETA inamic.\n";
-                    else if (res == 'I') std::cout << "INTERCEPTOR inamic.\n";
                 }
 
                 validTurn = true; // Tura s-a terminat cu succes, ieșim din do-while
@@ -247,7 +236,6 @@ void Game::startBattle() {
                 }
                 break;
             }
-
         } while (playerBoard.isCellAlreadyAttacked(aiMove));
         char aiRes = playerBoard.attackCell(aiMove);
         std::cout << "A tras la coordonatele " << aiMove << ": ";

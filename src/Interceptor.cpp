@@ -2,7 +2,7 @@
 // Created by Maria Tuta on 20.05.2026.
 //
 
-#include "Interceptor.h"
+#include "../include/Interceptor.h"
 
 
 std::vector<Point> InterceptorPlane::calculateShapePoints() const {

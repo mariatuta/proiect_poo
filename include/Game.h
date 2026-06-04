@@ -32,11 +32,10 @@ public:
     }
 };
 
-// 4. Pentru celule indisponibile (Ocupate la configurare sau Deja Atacate la luptă)
-class CellUnavailableException : public GameException {
+// 4. daca nu sunt exact 6 avioane în total
+class FlotillaIncompleteException : public GameException {
 public:
-    explicit CellUnavailableException(const std::string &message) : GameException(message) {
-    }
+    explicit FlotillaIncompleteException(const std::string &message) : GameException(message) {}
 };
 
 enum class Difficulty { EASY, MEDIUM, ADVANCED };

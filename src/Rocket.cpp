@@ -2,7 +2,7 @@
 // Created by Maria Tuta on 20.05.2026.
 //
 
-#include "Rocket.h"
+#include "../include/Rocket.h"
 
 std::vector<Point> RocketPlane::calculateShapePoints() const {
     std::vector<Point> body;
