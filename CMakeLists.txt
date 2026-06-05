@@ -67,6 +67,8 @@ add_executable(${MAIN_EXECUTABLE_NAME}
         include/Board.h
         src/Game.cpp
         include/Game.h
+        src/Stealth.cpp
+        include/Stealth.h
 )
 
 # NOTE: Add all defined targets (e.g. executables, libraries, etc. )

@@ -25,6 +25,7 @@ protected:
 
 public:
     Aeroplane(Point h, Direction d);
+
     virtual ~Aeroplane();
 
     // Constructor virtual (clone)
