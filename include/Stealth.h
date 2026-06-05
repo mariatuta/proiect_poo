@@ -11,7 +11,9 @@ protected:
     std::vector<Point> calculateShapePoints() const override;
 
 public:
-    StealthPlane(Point h, Direction d) : Aeroplane(h, d) {}
+    StealthPlane(Point h, Direction d) : Aeroplane(h, d) {
+    }
+
     std::unique_ptr<Aeroplane> clone() const override {
         return std::make_unique<StealthPlane>(*this);
     }
