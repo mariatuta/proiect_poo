@@ -14,20 +14,22 @@
 #include <tuple>
 
 // Memorie statica pentru a putea dezvalui avioanele AI pe modul EASY
-static std::vector<std::tuple<int, int, int, Direction>> g_aiPlanes;
+static std::vector<std::tuple<int, int, int, Direction> > g_aiPlanes;
 
-std::vector<std::pair<int, int>> getPlaneCellsLocal(int type, int hRow, int hCol, Direction dir) {
-    std::vector<std::pair<int, int>> rel;
+std::vector<std::pair<int, int> > getPlaneCellsLocal(int type, int hRow, int hCol, Direction dir) {
+    std::vector<std::pair<int, int> > rel;
 
     // NORD: Avionul este orientat in SUS. Corpul se intinde in JOS (+Linie).
     // Coordonatele sunt stocate ca {dRow, dCol}
-    if (type == 0) rel = {{0,0}, {1,0}, {1,-1}, {1,1}, {2,0}, {3,0}}; // Interceptor
-    else if (type == 1) rel = {{0,0}, {1,-2}, {1,-1}, {1,0}, {1,1}, {1,2}, {2,0}, {3,-1}, {3,0}, {3,1}}; // Bomber
-    else if (type == 2) rel = {{0,0}, {1,0}, {2,0}, {3,0}}; // Rocket
-    else if (type == 3) rel = {{0,0}, {1,0}, {2,-1}, {2,1}}; // Stealth (Forma perfecta de sageata dictata de tine)
+    if (type == 0) rel = {{0, 0}, {1, 0}, {1, -1}, {1, 1}, {2, 0}, {3, 0}}; // Interceptor
+    else if (type == 1) rel = {
+                            {0, 0}, {1, -2}, {1, -1}, {1, 0}, {1, 1}, {1, 2}, {2, 0}, {3, -1}, {3, 0}, {3, 1}
+                        }; // Bomber
+    else if (type == 2) rel = {{0, 0}, {1, 0}, {2, 0}, {3, 0}}; // Rocket
+    else if (type == 3) rel = {{0, 0}, {1, 0}, {2, -1}, {2, 1}}; // Stealth (Forma perfecta de sageata dictata de tine)
 
-    std::vector<std::pair<int, int>> res;
-    for (auto& p : rel) {
+    std::vector<std::pair<int, int> > res;
+    for (auto &p: rel) {
         int dRow = p.first, dCol = p.second;
         int rRow = dRow, rCol = dCol;
 
@@ -36,13 +38,11 @@ std::vector<std::pair<int, int>> getPlaneCellsLocal(int type, int hRow, int hCol
             // Orientat spre DREAPTA. Corpul se intinde spre STANGA (-Coloana)
             rRow = dCol;
             rCol = -dRow;
-        }
-        else if (dir == Direction::SOUTH) {
+        } else if (dir == Direction::SOUTH) {
             // Orientat in JOS. Corpul se intinde in SUS (-Linie)
             rRow = -dRow;
             rCol = -dCol;
-        }
-        else if (dir == Direction::WEST) {
+        } else if (dir == Direction::WEST) {
             // Orientat spre STANGA. Corpul se intinde spre DREAPTA (+Coloana)
             rRow = -dCol;
             rCol = dRow;
@@ -139,7 +139,6 @@ void Game::runGUI() {
     const float aiOffsetY = 120.f;
 
     while (window.isOpen()) {
-
         sf::Vector2i mousePos = sf::Mouse::getPosition(window);
         int hoverCol = (mousePos.x - playerOffsetX) / cellSize;
         int hoverRow = (mousePos.y - playerOffsetY) / cellSize;
@@ -159,12 +158,18 @@ void Game::runGUI() {
 
                 if (currentState == GameState::DIFFICULTY) {
                     if (mouseY >= 250 && mouseY <= 330) {
-                        if (mouseX >= 200 && mouseX <= 350) { gameDifficulty = Difficulty::EASY; currentState = GameState::SELECTION; }
-                        else if (mouseX >= 425 && mouseX <= 575) { gameDifficulty = Difficulty::MEDIUM; currentState = GameState::SELECTION; }
-                        else if (mouseX >= 650 && mouseX <= 800) { gameDifficulty = Difficulty::ADVANCED; currentState = GameState::SELECTION; }
+                        if (mouseX >= 200 && mouseX <= 350) {
+                            gameDifficulty = Difficulty::EASY;
+                            currentState = GameState::SELECTION;
+                        } else if (mouseX >= 425 && mouseX <= 575) {
+                            gameDifficulty = Difficulty::MEDIUM;
+                            currentState = GameState::SELECTION;
+                        } else if (mouseX >= 650 && mouseX <= 800) {
+                            gameDifficulty = Difficulty::ADVANCED;
+                            currentState = GameState::SELECTION;
+                        }
                     }
-                }
-                else if (currentState == GameState::SELECTION) {
+                } else if (currentState == GameState::SELECTION) {
                     if (mouseY >= 200 && mouseY <= 400) {
                         if (mouseX >= 50 && mouseX <= 250) chosenFleetType = 0;
                         else if (mouseX >= 275 && mouseX <= 475) chosenFleetType = 1;
@@ -173,15 +178,16 @@ void Game::runGUI() {
 
                         if (chosenFleetType != -1) currentState = GameState::PLACEMENT;
                     }
-                }
-                else if (currentState == GameState::PLACEMENT) {
+                } else if (currentState == GameState::PLACEMENT) {
                     if (hoverRow >= 0 && hoverRow < gridSize && hoverCol >= 0 && hoverCol < gridSize) {
-
                         std::unique_ptr<Aeroplane> newPlane = nullptr;
                         // FIX: Trimitem la Backend Point(Linie, Coloana)
-                        if (chosenFleetType == 0) newPlane = std::make_unique<InterceptorPlane>(Point(hoverRow, hoverCol), currentDir);
-                        else if (chosenFleetType == 1) newPlane = std::make_unique<BomberPlane>(Point(hoverRow, hoverCol), currentDir);
-                        else if (chosenFleetType == 2) newPlane = std::make_unique<RocketPlane>(Point(hoverRow, hoverCol), currentDir);
+                        if (chosenFleetType == 0) newPlane = std::make_unique<InterceptorPlane>(
+                                                      Point(hoverRow, hoverCol), currentDir);
+                        else if (chosenFleetType == 1) newPlane = std::make_unique<BomberPlane>(
+                                                           Point(hoverRow, hoverCol), currentDir);
+                        else if (chosenFleetType == 2) newPlane = std::make_unique<RocketPlane>(
+                                                           Point(hoverRow, hoverCol), currentDir);
                         else newPlane = std::make_unique<StealthPlane>(Point(hoverRow, hoverCol), currentDir);
 
                         if (playerBoard.addPlane(std::move(newPlane))) {
@@ -203,8 +209,7 @@ void Game::runGUI() {
                             }
                         }
                     }
-                }
-                else if (currentState == GameState::BATTLE) {
+                } else if (currentState == GameState::BATTLE) {
                     int clickCol = (mouseX - aiOffsetX) / cellSize;
                     int clickRow = (mouseY - aiOffsetY) / cellSize;
 
@@ -219,7 +224,7 @@ void Game::runGUI() {
                                 aiPlanesAlive--;
 
                                 if (gameDifficulty == Difficulty::EASY) {
-                                    for (auto& p : g_aiPlanes) {
+                                    for (auto &p: g_aiPlanes) {
                                         int pType = std::get<0>(p);
                                         int pRow = std::get<1>(p);
                                         int pCol = std::get<2>(p);
@@ -227,7 +232,7 @@ void Game::runGUI() {
 
                                         if (pRow == clickRow && pCol == clickCol) {
                                             auto cells = getPlaneCellsLocal(pType, pRow, pCol, pDir);
-                                            for (auto& c : cells) {
+                                            for (auto &c: cells) {
                                                 int cRow = c.first, cCol = c.second;
                                                 if (cRow >= 0 && cRow < 10 && cCol >= 0 && cCol < 10) {
                                                     if (visualAIGrid[cRow][cCol] != '!') {
@@ -248,7 +253,8 @@ void Game::runGUI() {
                                 Point aiMove;
                                 int safetyCounter = 0;
                                 do {
-                                    if (gameDifficulty == Difficulty::ADVANCED && huntingMode && !targetsToTry.empty()) {
+                                    if (gameDifficulty == Difficulty::ADVANCED && huntingMode && !targetsToTry.
+                                        empty()) {
                                         aiMove = targetsToTry.back();
                                         targetsToTry.pop_back();
                                     } else {
@@ -272,7 +278,9 @@ void Game::runGUI() {
 
                                 char aiRes = playerBoard.attackCell(aiMove);
                                 // Salvam raspunsul AI-ului direct la Linie/Coloana corecta
-                                visualPlayerGrid[aiMove.getX()][aiMove.getY()] = (aiRes == 'B' || aiRes == '!') ? '!' : aiRes;
+                                visualPlayerGrid[aiMove.getX()][aiMove.getY()] = (aiRes == 'B' || aiRes == '!')
+                                    ? '!'
+                                    : aiRes;
 
                                 if (aiRes == 'X') {
                                     if (gameDifficulty == Difficulty::ADVANCED) {
@@ -282,7 +290,8 @@ void Game::runGUI() {
                                         for (int i = 0; i < 4; ++i) {
                                             int nx = aiMove.getX() + dx[i];
                                             int ny = aiMove.getY() + dy[i];
-                                            if (nx >= 0 && nx < 10 && ny >= 0 && ny < 10) targetsToTry.emplace_back(nx, ny);
+                                            if (nx >= 0 && nx < 10 && ny >= 0 && ny < 10) targetsToTry.emplace_back(
+                                                nx, ny);
                                         }
                                     }
                                 } else if (aiRes == '!' || aiRes == 'B') {
@@ -333,8 +342,7 @@ void Game::runGUI() {
                 btnText.setPosition(200.f + i * 225.f + 30.f, 275.f);
                 window.draw(btnText);
             }
-        }
-        else if (currentState == GameState::SELECTION) {
+        } else if (currentState == GameState::SELECTION) {
             titleText.setString("CHOOSE YOUR FLEET TYPE");
             titleText.setPosition(320.f, 80.f);
             window.draw(titleText);
@@ -342,7 +350,7 @@ void Game::runGUI() {
             std::string names[] = {"0. INTERCEPTOR", "1. BOMBER", "2. ROCKET", "3. STEALTH"};
             float blockX[] = {150.f, 375.f, 600.f, 825.f};
 
-            for(int i = 0; i < 4; i++) {
+            for (int i = 0; i < 4; i++) {
                 sf::Text nameText(names[i], font, 18);
                 nameText.setFillColor(sf::Color::Black);
                 nameText.setPosition(blockX[i] - 60.f, 400.f);
@@ -362,16 +370,16 @@ void Game::runGUI() {
                     window.draw(sq);
                 }
             }
-        }
-        else if (currentState == GameState::PLACEMENT || currentState == GameState::BATTLE) {
-
+        } else if (currentState == GameState::PLACEMENT || currentState == GameState::BATTLE) {
             sf::Text infoText;
             infoText.setFont(font);
             infoText.setCharacterSize(20);
             infoText.setFillColor(sf::Color::Black);
 
             if (currentState == GameState::PLACEMENT) {
-                infoText.setString("FLEET DEPLOYMENT: Place " + std::to_string(3 - planesPlaced) + " more planes.\nCurrent Direction: " + dirToString(currentDir) + " (Use L/R Arrows to rotate)");
+                infoText.setString(
+                    "FLEET DEPLOYMENT: Place " + std::to_string(3 - planesPlaced) + " more planes.\nCurrent Direction: "
+                    + dirToString(currentDir) + " (Use L/R Arrows to rotate)");
                 infoText.setPosition(50.f, 30.f);
             } else {
                 infoText.setString("YOUR FLEET (" + std::to_string(playerPlanesAlive) + " left)");
@@ -405,13 +413,16 @@ void Game::runGUI() {
             }
 
             // 2. Desenam umbra in faza de plasare
-            if (currentState == GameState::PLACEMENT && hoverRow >= 0 && hoverRow < gridSize && hoverCol >= 0 && hoverCol < gridSize) {
+            if (currentState == GameState::PLACEMENT && hoverRow >= 0 && hoverRow < gridSize && hoverCol >= 0 &&
+                hoverCol < gridSize) {
                 auto shadowCells = getPlaneCellsLocal(chosenFleetType, hoverRow, hoverCol, currentDir);
 
                 bool isValid = true;
-                for (auto& p : shadowCells) {
-                    if (p.first < 0 || p.first >= gridSize || p.second < 0 || p.second >= gridSize || visualPlayerGrid[p.first][p.second] != '~') {
-                        isValid = false; break;
+                for (auto &p: shadowCells) {
+                    if (p.first < 0 || p.first >= gridSize || p.second < 0 || p.second >= gridSize || visualPlayerGrid[p
+                            .first][p.second] != '~') {
+                        isValid = false;
+                        break;
                     }
                 }
 

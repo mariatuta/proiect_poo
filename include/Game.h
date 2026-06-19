@@ -65,6 +65,7 @@ private:
     static void clearInput();
 
     void setupAIBoard(int typeChoice);
+
     // --- VARIABILE NOI PENTRU GRAFICĂ ---
     GameState currentState;
     int chosenFleetType;
@@ -79,7 +80,9 @@ private:
 
     // Funcții utilitare noi pentru grafică
     Direction rotateRight(Direction dir);
+
     Direction rotateLeft(Direction dir);
+
     std::string dirToString(Direction dir);
 
 public:
@@ -87,6 +90,7 @@ public:
 
     void setupPlayerBoard(); // Gestionează faza de configurare a ambilor jucători
     void startBattle();
+
     void runGUI();
 };
 
