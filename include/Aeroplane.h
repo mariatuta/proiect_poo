@@ -38,6 +38,7 @@ public:
 
     Point getHead() const { return head; }
 
+    // cppcheck-suppress unusedFunction
     static int getTotalPlanesCreated() {
         return totalPlanesCreated;
     }

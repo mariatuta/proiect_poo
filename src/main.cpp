@@ -1,36 +1,39 @@
-//#include <ctime>
-//#include <cstdlib>
 #include "../include/Game.h"
-//#include <iostream>
-//#include <SFML/Graphics.hpp>
+#include <iostream>
+#include <cstdlib> // Adăugat pentru std::getenv
 
 int main() {
+    // --- BYPASS PENTRU GITHUB ACTIONS ---
+    // Serverul GitHub Actions setează automat variabila de mediu "CI".
+    // Dacă o detectăm, oprim programul cu succes ca să nu încercăm să 
+    // deschidem o fereastră grafică pe un server fără monitor.
+    if (std::getenv("CI")) {
+        std::cout << "CI environment detected. Bypassing GUI execution.\n";
+        return 0;
+    }
+
     try {
         Game myGame("PaperSkyTactics - GUI Edition");
         myGame.runGUI();
     }
-    // 1. Prindem eroarea de coordonate trimise greșit în constructorul Aeroplane
+    // Prindem excepțiile personalizate
     catch (const InvalidCoordinatesException &e) {
-        std::cout << "[EROARE CRITICA CONSTRUCTOR] Coordonate fatale obiect:\n";
-        std::cout << e.what() << "\n";
+        std::cout << "[EROARE CRITICA CONSTRUCTOR] Coordonate fatale obiect:\n" << e.what() << "\n";
         return 1;
     }
-    // 2. Prindem eroarea de direcție invalidă trimisă în constructorul Aeroplane
     catch (const InvalidDirectionException &e) {
-        std::cout << "[EROARE CRITICA CONSTRUCTOR] Directie fatala obiect:\n";
-        std::cout << e.what() << "\n";
+        std::cout << "[EROARE CRITICA CONSTRUCTOR] Directie fatala obiect:\n" << e.what() << "\n";
         return 2;
     }
-    // 3. Prindem eroarea de integritate a flotei (bariera de securitate statică)
     catch (const FlotillaIncompleteException &e) {
-        std::cout << "[EROARE CRITICA SISTEM] Integritate joc compromisa:\n";
-        std::cout << e.what() << "\n";
+        std::cout << "[EROARE CRITICA SISTEM] Integritate joc compromisa:\n" << e.what() << "\n";
         return 3;
     }
-    // 4. Prindem orice altă excepție standard neprevăzută din C++
+    // Prindem orice altă excepție
     catch (const std::exception &e) {
         std::cout << "\n[EROARE SISTEM NEPREVAZUTA]: " << e.what() << "\n";
         return 4;
     }
+
     return 0;
 }

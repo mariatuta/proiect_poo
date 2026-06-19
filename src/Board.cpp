@@ -37,7 +37,7 @@ Board &Board::operator=(Board other) {
     swap(*this, other);
     return *this;
 }
-
+// cppcheck-suppress unusedFunction
 bool Board::addPlane(std::unique_ptr<Aeroplane> plane) {
     std::vector<Point> body = plane->getBodyPoints(); // Apel NVI
     Point head = plane->getHead();
@@ -66,6 +66,7 @@ bool Board::addPlane(std::unique_ptr<Aeroplane> plane) {
 }
 
 //procesare atac
+// cppcheck-suppress unusedFunction
 char Board::attackCell(const Point &p) {
     int x = p.getX();
     int y = p.getY();
@@ -104,7 +105,7 @@ char Board::attackCell(const Point &p) {
     }
     return grid[x][y];
 }
-
+// cppcheck-suppress unusedFunction
 bool Board::isCellAlreadyAttacked(const Point &p) const {
     int x = p.getX();
     int y = p.getY();
@@ -118,18 +119,9 @@ bool Board::isCellAlreadyAttacked(const Point &p) const {
     return (grid[x][y] == 'X' || grid[x][y] == '!' || grid[x][y] == 'O' || grid[x][y] == '#');
 }
 
-// bool Board::hasPlanesLeft() const {
-//     for (int i = 0; i < SIZE; ++i) {
-//         for (int j = 0; j < SIZE; ++j) {
-//             if (grid[i][j] == 'B' || grid[i][j] == 'H') {
-//                 return true;
-//             }
-//         }
-//     }
-//     return false;
-// }
 
 // Afișarea grafică a tablei (High-level)
+// cppcheck-suppress unusedFunction
 void Board::printBoard(bool hidePlanes) const {
     std::cout << "  ";
     for (int i = 0; i < SIZE; ++i) std::cout << i << " ";
