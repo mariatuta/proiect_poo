@@ -10,6 +10,7 @@
 #include <vector>
 #include "Board.h"
 #include "Point.h"
+#include <SFML/Graphics.hpp>
 
 // 1. Clasa de bază
 class GameException : public std::runtime_error {
@@ -39,6 +40,13 @@ public:
     }
 };
 
+enum class GameState {
+    DIFFICULTY,
+    SELECTION,
+    PLACEMENT,
+    BATTLE
+};
+
 enum class Difficulty { EASY, MEDIUM, ADVANCED };
 
 class Game {
@@ -57,12 +65,29 @@ private:
     static void clearInput();
 
     void setupAIBoard(int typeChoice);
+    // --- VARIABILE NOI PENTRU GRAFICĂ ---
+    GameState currentState;
+    int chosenFleetType;
+    Direction currentDir;
+    int planesPlaced;
+    char visualAIGrid[10][10];
+    char visualPlayerGrid[10][10];
+
+    // Funcții utilitare interne privatizate
+    // static void clearInput();
+    // void setupAIBoard(int typeChoice);
+
+    // Funcții utilitare noi pentru grafică
+    Direction rotateRight(Direction dir);
+    Direction rotateLeft(Direction dir);
+    std::string dirToString(Direction dir);
 
 public:
     explicit Game(std::string name);
 
     void setupPlayerBoard(); // Gestionează faza de configurare a ambilor jucători
     void startBattle();
+    void runGUI();
 };
 
 

@@ -9,7 +9,7 @@ std::vector<Point> StealthPlane::calculateShapePoints() const {
     int hx = head.getX();
     int hy = head.getY();
 
-    shape.push_back(head);
+    //shape.push_back(head);
 
     if (dir == Direction::NORTH) {
         shape.emplace_back(hx + 1, hy);

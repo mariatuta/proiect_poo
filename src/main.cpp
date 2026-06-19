@@ -1,15 +1,13 @@
-#include <ctime>
-#include <cstdlib>
+//#include <ctime>
+//#include <cstdlib>
 #include "../include/Game.h"
-#include <iostream>
-
+//#include <iostream>
+//#include <SFML/Graphics.hpp>
 
 int main() {
-    srand(static_cast<unsigned>(time(nullptr))); // Pentru randomizare reală
     try {
-        Game myGame("PaperSkyTactics");
-        myGame.setupPlayerBoard();
-        myGame.startBattle();
+        Game myGame("PaperSkyTactics - GUI Edition");
+        myGame.runGUI();
     }
     // 1. Prindem eroarea de coordonate trimise greșit în constructorul Aeroplane
     catch (const InvalidCoordinatesException &e) {
@@ -35,4 +33,5 @@ int main() {
         return 4;
     }
     return 0;
+
 }
