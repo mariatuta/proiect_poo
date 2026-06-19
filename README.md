@@ -2,7 +2,41 @@
 
 ### Description
 
-PaperSkyTactics is a game that simulates the game of "planes on paper". Each player positions 3 planes on a 10x10 board, in one of the possible directions: north, south, west or east. The goal of the game is for one player to find all 3 "heads" of the other player's planes. Each player chooses, in turn, a cell on the game board. There are 3 possible outcomes: the cell is empty, it is a part of the plane's "body" or it is the "head" of the plane. If someone finds the "head" of a plane, the positioning of the entire plane will be shown.
+**PaperSkyTactics** is a digital version of the traditional game "Planes on Paper". The game is played on a 10x10 grid where the human player and the opponent each position 3 planes. Every plane has a designated "Head" cell and is oriented in one of four directions: North, South, East, or West.
+
+The main objective of the game is to find and destroy all 3 enemy plane heads before the computer destroys yours.
+
+#### Gameplay Rules and Mechanics
+Players take turns picking a cell on the opponent's grid. Every attack has one of three results:
+
+**Miss (shown as 'O')** – The selected cell is empty.
+
+**Body Hit (shown as 'X')** – You hit a part of the plane's body (wings or tail). The plane is damaged but still active.
+
+**Head Shot (shown as '!')** – You successfully hit the plane's head. The plane is immediately shot down.
+
+#### Game Options and Configurations
+When starting a match, the player can customize the game using two main settings:
+
+#### 1. Aircraft Types
+You can choose the type of planes used in the match. Each type has a completely different shape on the grid:
+
+**Interceptor (Type 0)**: The classic cross shape, made of 6 cells.
+
+**Bomber (Type 1)**: A large aircraft with wide 5-cell wings and a 3-cell tail.
+
+**Rocket (Type 2)**: A straight, linear projectile that occupies 4 cells in a row.
+
+**Stealth (Type 3)**: A compact, aerodynamic arrowhead shape made of 4 cells.
+
+#### 2. Difficulty Levels
+The difficulty changes how the grid behaves and how smart the computer plays:
+
+**Easy**: When an enemy plane is shot down, its entire body layout is automatically revealed on the map using the '#' symbol. The computer shoots completely at random.
+
+**Medium**: Standard rules. When a plane is shot down, you only see the '!' symbol on the head, while the rest of the body cells remain hidden. The computer shoots at random.
+
+**Advanced**: The computer becomes strategic. If it hits one of your plane bodies ('X'), it stops shooting randomly and starts attacking the adjacent cells (North, South, East, West) to actively search for and destroy your plane's head.
 
 ### Important!
 
