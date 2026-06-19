@@ -22,9 +22,10 @@ std::vector<std::pair<int, int> > getPlaneCellsLocal(int type, int hRow, int hCo
     // NORD: Avionul este orientat in SUS. Corpul se intinde in JOS (+Linie).
     // Coordonatele sunt stocate ca {dRow, dCol}
     if (type == 0) rel = {{0, 0}, {1, 0}, {1, -1}, {1, 1}, {2, 0}, {3, 0}}; // Interceptor
-    else if (type == 1) rel = {
-                            {0, 0}, {1, -2}, {1, -1}, {1, 0}, {1, 1}, {1, 2}, {2, 0}, {3, -1}, {3, 0}, {3, 1}
-                        }; // Bomber
+    else if (type == 1)
+        rel = {
+            {0, 0}, {1, -2}, {1, -1}, {1, 0}, {1, 1}, {1, 2}, {2, 0}, {3, -1}, {3, 0}, {3, 1}
+        }; // Bomber
     else if (type == 2) rel = {{0, 0}, {1, 0}, {2, 0}, {3, 0}}; // Rocket
     else if (type == 3) rel = {{0, 0}, {1, 0}, {2, -1}, {2, 1}}; // Stealth (Forma perfecta de sageata dictata de tine)
 
@@ -182,12 +183,15 @@ void Game::runGUI() {
                     if (hoverRow >= 0 && hoverRow < gridSize && hoverCol >= 0 && hoverCol < gridSize) {
                         std::unique_ptr<Aeroplane> newPlane = nullptr;
                         // FIX: Trimitem la Backend Point(Linie, Coloana)
-                        if (chosenFleetType == 0) newPlane = std::make_unique<InterceptorPlane>(
-                                                      Point(hoverRow, hoverCol), currentDir);
-                        else if (chosenFleetType == 1) newPlane = std::make_unique<BomberPlane>(
-                                                           Point(hoverRow, hoverCol), currentDir);
-                        else if (chosenFleetType == 2) newPlane = std::make_unique<RocketPlane>(
-                                                           Point(hoverRow, hoverCol), currentDir);
+                        if (chosenFleetType == 0)
+                            newPlane = std::make_unique<InterceptorPlane>(
+                                Point(hoverRow, hoverCol), currentDir);
+                        else if (chosenFleetType == 1)
+                            newPlane = std::make_unique<BomberPlane>(
+                                Point(hoverRow, hoverCol), currentDir);
+                        else if (chosenFleetType == 2)
+                            newPlane = std::make_unique<RocketPlane>(
+                                Point(hoverRow, hoverCol), currentDir);
                         else newPlane = std::make_unique<StealthPlane>(Point(hoverRow, hoverCol), currentDir);
 
                         if (playerBoard.addPlane(std::move(newPlane))) {
@@ -279,8 +283,8 @@ void Game::runGUI() {
                                 char aiRes = playerBoard.attackCell(aiMove);
                                 // Salvam raspunsul AI-ului direct la Linie/Coloana corecta
                                 visualPlayerGrid[aiMove.getX()][aiMove.getY()] = (aiRes == 'B' || aiRes == '!')
-                                    ? '!'
-                                    : aiRes;
+                                        ? '!'
+                                        : aiRes;
 
                                 if (aiRes == 'X') {
                                     if (gameDifficulty == Difficulty::ADVANCED) {
@@ -290,8 +294,9 @@ void Game::runGUI() {
                                         for (int i = 0; i < 4; ++i) {
                                             int nx = aiMove.getX() + dx[i];
                                             int ny = aiMove.getY() + dy[i];
-                                            if (nx >= 0 && nx < 10 && ny >= 0 && ny < 10) targetsToTry.emplace_back(
-                                                nx, ny);
+                                            if (nx >= 0 && nx < 10 && ny >= 0 && ny < 10)
+                                                targetsToTry.emplace_back(
+                                                    nx, ny);
                                         }
                                     }
                                 } else if (aiRes == '!' || aiRes == 'B') {

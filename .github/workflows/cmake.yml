@@ -40,11 +40,11 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v6.0.2
 
-      # --- ADAUGAT PENTRU SFML ---
-      - name: Install SFML
+      # --- ADAUGAT PENTRU SFML (Cu toate dependințele incluse) ---
+      - name: Install SFML and Build Dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y libsfml-dev
+          sudo apt-get install -y libsfml-dev libudev-dev libxrandr-dev libxcursor-dev libfreetype6-dev libopenal-dev libflac-dev libvorbis-dev libgl1-mesa-dev libegl1-mesa-dev
       # ---------------------------
 
       - name: Run cppcheck
@@ -62,11 +62,11 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v6.0.2
 
-      # --- ADAUGAT PENTRU SFML ---
-      - name: Install SFML
+      # --- ADAUGAT PENTRU SFML (Cu toate dependințele incluse) ---
+      - name: Install SFML and Build Dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y libsfml-dev
+          sudo apt-get install -y libsfml-dev libudev-dev libxrandr-dev libxcursor-dev libfreetype6-dev libopenal-dev libflac-dev libvorbis-dev libgl1-mesa-dev libegl1-mesa-dev
       # ---------------------------
 
       - name: Run clang-tidy
@@ -162,12 +162,12 @@ jobs:
       - name: Install packages
         uses: ./.github/actions/install-packages
 
-      # --- ADAUGAT PENTRU SFML ---
-      - name: Install SFML (Ubuntu)
+      # --- ADAUGAT PENTRU SFML (Cu toate dependințele incluse) ---
+      - name: Install SFML and Build Dependencies (Ubuntu)
         if: startsWith(matrix.os, 'ubuntu')
         run: |
           sudo apt-get update
-          sudo apt-get install -y libsfml-dev
+          sudo apt-get install -y libsfml-dev libudev-dev libxrandr-dev libxcursor-dev libfreetype6-dev libopenal-dev libflac-dev libvorbis-dev libgl1-mesa-dev libegl1-mesa-dev
 
       - name: Install SFML (macOS)
         if: startsWith(matrix.os, 'macos')
