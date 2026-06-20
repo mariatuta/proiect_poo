@@ -7,9 +7,12 @@
 
 #include <stdexcept>
 #include <string>
-#include <vector>
+//#include <vector>
 #include "Board.h"
-#include "Point.h"
+//#include "Point.h"
+#include "AIAttackStrategy.h"
+#include "Templates.h"
+#include <memory>
 #include <SFML/Graphics.hpp>
 
 // 1. Clasa de bază
@@ -44,7 +47,8 @@ enum class GameState {
     DIFFICULTY,
     SELECTION,
     PLACEMENT,
-    BATTLE
+    BATTLE,
+    GAME_OVER
 };
 
 enum class Difficulty { EASY, MEDIUM, ADVANCED };
@@ -58,25 +62,31 @@ private:
     int aiPlanesAlive;
 
     Difficulty gameDifficulty;
-    bool huntingMode;
-    std::vector<Point> targetsToTry;
+    std::unique_ptr<AIAttackStrategy> aiStrategy;
 
     // Funcții utilitare interne privatizate
-    static void clearInput();
+    //static void clearInput();
 
-    void setupAIBoard(int typeChoice);
+    //void setupAIBoard(int typeChoice);
 
-    // --- VARIABILE NOI PENTRU GRAFICĂ ---
+    // --- VARIABILE NOI PENTRU GRAFICA ---
     GameState currentState;
     int chosenFleetType;
     Direction currentDir;
     int planesPlaced;
-    char visualAIGrid[10][10];
-    char visualPlayerGrid[10][10];
+
+    bool playerWon;
+
+    // template class- instanțierea 1 cu tipul 'char' vizual
+    Grid2D<char, 10> visualAIGrid;
+    Grid2D<char, 10> visualPlayerGrid;
+
+    // template class- instanțierea 1 cu tipul 'bool' intern
+    Grid2D<bool, 10> aiDiscoveredCells;
 
     // Funcții utilitare interne privatizate
-    // static void clearInput();
-    // void setupAIBoard(int typeChoice);
+    static void clearInput();
+    void setupAIBoard(int typeChoice);
 
     // Funcții utilitare noi pentru grafică
     Direction rotateRight(Direction dir);

@@ -3,10 +3,8 @@
 //
 
 #include "Game.h"
-#include "../include/Bomber.h"
-#include "../include/Interceptor.h"
-#include "Rocket.h"
-#include "Stealth.h"
+#include "../include/Factory.h"
+#include "Templates.h"
 #include <iostream>
 #include <limits>
 #include <cstdlib>
@@ -19,32 +17,24 @@ static std::vector<std::tuple<int, int, int, Direction> > g_aiPlanes;
 std::vector<std::pair<int, int> > getPlaneCellsLocal(int type, int hRow, int hCol, Direction dir) {
     std::vector<std::pair<int, int> > rel;
 
-    // NORD: Avionul este orientat in SUS. Corpul se intinde in JOS (+Linie).
-    // Coordonatele sunt stocate ca {dRow, dCol}
     if (type == 0) rel = {{0, 0}, {1, 0}, {1, -1}, {1, 1}, {2, 0}, {3, 0}}; // Interceptor
     else if (type == 1)
-        rel = {
-            {0, 0}, {1, -2}, {1, -1}, {1, 0}, {1, 1}, {1, 2}, {2, 0}, {3, -1}, {3, 0}, {3, 1}
-        }; // Bomber
+        rel = {{0, 0}, {1, -2}, {1, -1}, {1, 0}, {1, 1}, {1, 2}, {2, 0}, {3, -1}, {3, 0}, {3, 1}}; // Bomber
     else if (type == 2) rel = {{0, 0}, {1, 0}, {2, 0}, {3, 0}}; // Rocket
-    else if (type == 3) rel = {{0, 0}, {1, 0}, {2, -1}, {2, 1}}; // Stealth (Forma perfecta de sageata dictata de tine)
+    else if (type == 3) rel = {{0, 0}, {1, 0}, {2, -1}, {2, 1}}; // Stealth
 
     std::vector<std::pair<int, int> > res;
     for (auto &p: rel) {
         int dRow = p.first, dCol = p.second;
         int rRow = dRow, rCol = dCol;
 
-        // Rotatia Matematica Corectata
         if (dir == Direction::EAST) {
-            // Orientat spre DREAPTA. Corpul se intinde spre STANGA (-Coloana)
             rRow = dCol;
             rCol = -dRow;
         } else if (dir == Direction::SOUTH) {
-            // Orientat in JOS. Corpul se intinde in SUS (-Linie)
             rRow = -dRow;
             rCol = -dCol;
         } else if (dir == Direction::WEST) {
-            // Orientat spre STANGA. Corpul se intinde spre DREAPTA (+Coloana)
             rRow = -dCol;
             rCol = dRow;
         }
@@ -54,10 +44,10 @@ std::vector<std::pair<int, int> > getPlaneCellsLocal(int type, int hRow, int hCo
     return res;
 }
 
-// Constructorul clasei Game
+// Constructorul: Initializam default AI-ul cu Strategia Random
 Game::Game(std::string name)
     : projectName(std::move(name)), playerPlanesAlive(3), aiPlanesAlive(3),
-      gameDifficulty(Difficulty::EASY), huntingMode(false) {
+      gameDifficulty(Difficulty::EASY), aiStrategy(std::make_unique<RandomAttackStrategy>()) {
 }
 
 void Game::clearInput() {
@@ -65,21 +55,21 @@ void Game::clearInput() {
     std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
 }
 
-// Generarea automată a flotei AI
 void Game::setupAIBoard(int typeChoice) {
     g_aiPlanes.clear();
     int count = 0;
+
+    // Vectorii pentru extragere aleatorie folosind functia sablon
+    std::vector<int> coordPool = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
+    std::vector<Direction> dirPool = {Direction::NORTH, Direction::SOUTH, Direction::EAST, Direction::WEST};
+
     while (count < 3) {
-        int rx = rand() % 10;
-        int ry = rand() % 10;
-        auto rd = static_cast<Direction>(rand() % 4);
+        // template function - instantierea 1 (int) si Instantierea 2 (Direction)
+        int rx = getRandomElement<int>(coordPool);
+        int ry = getRandomElement<int>(coordPool);
+        Direction rd = getRandomElement<Direction>(dirPool);
 
-        std::unique_ptr<Aeroplane> newPlane = nullptr;
-
-        if (typeChoice == 0) newPlane = std::make_unique<InterceptorPlane>(Point(rx, ry), rd);
-        else if (typeChoice == 1) newPlane = std::make_unique<BomberPlane>(Point(rx, ry), rd);
-        else if (typeChoice == 2) newPlane = std::make_unique<RocketPlane>(Point(rx, ry), rd);
-        else newPlane = std::make_unique<StealthPlane>(Point(rx, ry), rd);
+        std::unique_ptr<Aeroplane> newPlane = PlaneFactory::createPlane(typeChoice, Point(rx, ry), rd);
 
         if (aiBoard.addPlane(std::move(newPlane))) {
             g_aiPlanes.push_back({typeChoice, rx, ry, rd});
@@ -122,12 +112,9 @@ void Game::runGUI() {
     currentDir = Direction::NORTH;
     planesPlaced = 0;
 
-    for (int i = 0; i < 10; ++i) {
-        for (int j = 0; j < 10; ++j) {
-            visualAIGrid[i][j] = '~';
-            visualPlayerGrid[i][j] = '~';
-        }
-    }
+    visualAIGrid.fill('~');
+    visualPlayerGrid.fill('~');
+    aiDiscoveredCells.fill(false);
 
     sf::RenderWindow window(sf::VideoMode(1000, 600), projectName);
     window.setFramerateLimit(60);
@@ -148,9 +135,16 @@ void Game::runGUI() {
         while (window.pollEvent(event)) {
             if (event.type == sf::Event::Closed) window.close();
 
-            if (event.type == sf::Event::KeyPressed && currentState == GameState::PLACEMENT) {
-                if (event.key.code == sf::Keyboard::Right) currentDir = rotateRight(currentDir);
-                else if (event.key.code == sf::Keyboard::Left) currentDir = rotateLeft(currentDir);
+            if (event.type == sf::Event::KeyPressed) {
+                if (currentState == GameState::PLACEMENT) {
+                    if (event.key.code == sf::Keyboard::Right) currentDir = rotateRight(currentDir);
+                    else if (event.key.code == sf::Keyboard::Left) currentDir = rotateLeft(currentDir);
+                }
+                else if (currentState == GameState::GAME_OVER) {
+                    if (event.key.code == sf::Keyboard::Enter) {
+                        window.close();
+                    }
+                }
             }
 
             if (event.type == sf::Event::MouseButtonPressed && event.mouseButton.button == sf::Mouse::Left) {
@@ -161,12 +155,15 @@ void Game::runGUI() {
                     if (mouseY >= 250 && mouseY <= 330) {
                         if (mouseX >= 200 && mouseX <= 350) {
                             gameDifficulty = Difficulty::EASY;
+                            aiStrategy = std::make_unique<RandomAttackStrategy>(); // SETARE STRATEGIE RANDOM
                             currentState = GameState::SELECTION;
                         } else if (mouseX >= 425 && mouseX <= 575) {
                             gameDifficulty = Difficulty::MEDIUM;
+                            aiStrategy = std::make_unique<RandomAttackStrategy>(); // SETARE STRATEGIE RANDOM
                             currentState = GameState::SELECTION;
                         } else if (mouseX >= 650 && mouseX <= 800) {
                             gameDifficulty = Difficulty::ADVANCED;
+                            aiStrategy = std::make_unique<HuntAttackStrategy>(); // SETARE STRATEGIE HUNTING
                             currentState = GameState::SELECTION;
                         }
                     }
@@ -181,18 +178,8 @@ void Game::runGUI() {
                     }
                 } else if (currentState == GameState::PLACEMENT) {
                     if (hoverRow >= 0 && hoverRow < gridSize && hoverCol >= 0 && hoverCol < gridSize) {
-                        std::unique_ptr<Aeroplane> newPlane = nullptr;
-                        // FIX: Trimitem la Backend Point(Linie, Coloana)
-                        if (chosenFleetType == 0)
-                            newPlane = std::make_unique<InterceptorPlane>(
-                                Point(hoverRow, hoverCol), currentDir);
-                        else if (chosenFleetType == 1)
-                            newPlane = std::make_unique<BomberPlane>(
-                                Point(hoverRow, hoverCol), currentDir);
-                        else if (chosenFleetType == 2)
-                            newPlane = std::make_unique<RocketPlane>(
-                                Point(hoverRow, hoverCol), currentDir);
-                        else newPlane = std::make_unique<StealthPlane>(Point(hoverRow, hoverCol), currentDir);
+
+                        std::unique_ptr<Aeroplane> newPlane = PlaneFactory::createPlane(chosenFleetType, Point(hoverRow, hoverCol), currentDir);
 
                         if (playerBoard.addPlane(std::move(newPlane))) {
                             auto cells = getPlaneCellsLocal(chosenFleetType, hoverRow, hoverCol, currentDir);
@@ -252,65 +239,25 @@ void Game::runGUI() {
 
                             if (aiPlanesAlive == 0) {
                                 std::cout << "\n[VICTORY] You destroyed the AI Fleet!\n";
-                                window.close();
+                                playerWon = true;
+                                currentState = GameState::GAME_OVER;
                             } else {
-                                Point aiMove;
-                                int safetyCounter = 0;
-                                do {
-                                    if (gameDifficulty == Difficulty::ADVANCED && huntingMode && !targetsToTry.
-                                        empty()) {
-                                        aiMove = targetsToTry.back();
-                                        targetsToTry.pop_back();
-                                    } else {
-                                        aiMove = Point(rand() % 10, rand() % 10);
-                                    }
-                                    safetyCounter++;
-                                    if (safetyCounter > 50) {
-                                        bool foundBackup = false;
-                                        for (int r = 0; r < 10 && !foundBackup; ++r) {
-                                            for (int c = 0; c < 10; ++c) {
-                                                if (!playerBoard.isCellAlreadyAttacked(Point(r, c))) {
-                                                    aiMove = Point(r, c);
-                                                    foundBackup = true;
-                                                    break;
-                                                }
-                                            }
-                                        }
-                                        break;
-                                    }
-                                } while (playerBoard.isCellAlreadyAttacked(aiMove));
-
+                                // STRATEGY
+                                Point aiMove = aiStrategy->getNextMove(playerBoard);
                                 char aiRes = playerBoard.attackCell(aiMove);
-                                // Salvam raspunsul AI-ului direct la Linie/Coloana corecta
-                                visualPlayerGrid[aiMove.getX()][aiMove.getY()] = (aiRes == 'B' || aiRes == '!')
-                                        ? '!'
-                                        : aiRes;
 
-                                if (aiRes == 'X') {
-                                    if (gameDifficulty == Difficulty::ADVANCED) {
-                                        huntingMode = true;
-                                        const int dx[] = {-1, 1, 0, 0};
-                                        const int dy[] = {0, 0, -1, 1};
-                                        for (int i = 0; i < 4; ++i) {
-                                            int nx = aiMove.getX() + dx[i];
-                                            int ny = aiMove.getY() + dy[i];
-                                            if (nx >= 0 && nx < 10 && ny >= 0 && ny < 10)
-                                                targetsToTry.emplace_back(
-                                                    nx, ny);
-                                        }
-                                    }
-                                } else if (aiRes == '!' || aiRes == 'B') {
-                                    playerPlanesAlive--;
-                                    if (gameDifficulty == Difficulty::ADVANCED) {
-                                        huntingMode = false;
-                                        targetsToTry.clear();
-                                    }
-                                }
+                                visualPlayerGrid[aiMove.getX()][aiMove.getY()] = (aiRes == 'B' || aiRes == '!') ? '!' : aiRes;
+
+                                aiStrategy->updateState(aiMove, aiRes);
+
+                                if (aiRes == '!' || aiRes == 'B') playerPlanesAlive--;
 
                                 if (playerPlanesAlive == 0) {
                                     std::cout << "\n[DEFEAT] AI destroyed your fleet!\n";
-                                    window.close();
+                                    playerWon = false;
+                                    currentState = GameState::GAME_OVER;
                                 }
+
                             }
                         }
                     }
@@ -364,7 +311,6 @@ void Game::runGUI() {
                 auto cells = getPlaneCellsLocal(i, 0, 0, Direction::NORTH);
                 for (size_t k = 0; k < cells.size(); k++) {
                     sf::RectangleShape sq(sf::Vector2f(25.f, 25.f));
-                    // Inversam Linia cu Coloana doar vizual pentru meniu ca sa fie orientate in sus pe ecran
                     sq.setPosition(blockX[i] + cells[k].second * 25.f, 200.f + cells[k].first * 25.f);
                     sq.setOutlineThickness(1.f);
                     sq.setOutlineColor(sf::Color::Black);
@@ -397,11 +343,9 @@ void Game::runGUI() {
             }
             window.draw(infoText);
 
-            // 1. Desenam grila Jucatorului
             for (int r = 0; r < gridSize; ++r) {
                 for (int c = 0; c < gridSize; ++c) {
                     sf::RectangleShape cell(sf::Vector2f(cellSize, cellSize));
-                    // X = coloana, Y = linia
                     cell.setPosition(playerOffsetX + c * cellSize, playerOffsetY + r * cellSize);
                     cell.setOutlineThickness(1.f);
                     cell.setOutlineColor(sf::Color::Black);
@@ -417,7 +361,6 @@ void Game::runGUI() {
                 }
             }
 
-            // 2. Desenam umbra in faza de plasare
             if (currentState == GameState::PLACEMENT && hoverRow >= 0 && hoverRow < gridSize && hoverCol >= 0 &&
                 hoverCol < gridSize) {
                 auto shadowCells = getPlaneCellsLocal(chosenFleetType, hoverRow, hoverCol, currentDir);
@@ -450,7 +393,6 @@ void Game::runGUI() {
                 }
             }
 
-            // 3. Desenam grila AI-ului
             if (currentState == GameState::BATTLE) {
                 for (int r = 0; r < gridSize; ++r) {
                     for (int c = 0; c < gridSize; ++c) {
@@ -470,15 +412,39 @@ void Game::runGUI() {
                 }
             }
         }
+        if (currentState == GameState::GAME_OVER) {
+            // Desenăm un fundal semi-transparent peste joc ca să îl întunecăm un pic
+            sf::RectangleShape overlay(sf::Vector2f(1000.f, 600.f));
+            overlay.setFillColor(sf::Color(0, 0, 0, 200));
+            window.draw(overlay);
+
+            sf::Text endText;
+            endText.setFont(font);
+            endText.setCharacterSize(45);
+            endText.setStyle(sf::Text::Bold);
+
+            if (playerWon) {
+                endText.setString("VICTORY!\nYou destroyed the AI Fleet!\n\nPress ENTER to exit.");
+                endText.setFillColor(sf::Color(100, 255, 100)); // Verde
+            } else {
+                endText.setString("DEFEAT!\nAI destroyed your fleet!\n\nPress ENTER to exit.");
+                endText.setFillColor(sf::Color(255, 100, 100)); // Roșu
+            }
+
+            // Centram textul pe mijlocul ecranului
+            sf::FloatRect textRect = endText.getLocalBounds();
+            endText.setOrigin(textRect.left + textRect.width / 2.0f, textRect.top + textRect.height / 2.0f);
+            endText.setPosition(sf::Vector2f(500.f, 300.f));
+
+            window.draw(endText);
+        }
         window.display();
     }
 }
 
-// Configurarea flotei jucătorului uman (Consola)
 void Game::setupPlayerBoard() {
     std::cout << "--- Configurare Flota Jucator (3 Avioane) ---\n";
 
-    // 1. Validare Meniu Dificultate prin IF-ELSE clasic
     bool dificultateValida = false;
     do {
         std::cout << "Alege dificultatea (0: Easy, 1: Medium, 2: Advanced): ";
@@ -488,14 +454,20 @@ void Game::setupPlayerBoard() {
             std::cout << ">>> Optiune invalida pentru nivel! Introdu strict 0, 1 sau 2.\n\n";
             clearInput();
         } else {
-            if (diffChoice == 0) gameDifficulty = Difficulty::EASY;
-            else if (diffChoice == 2) gameDifficulty = Difficulty::ADVANCED;
-            else gameDifficulty = Difficulty::MEDIUM;
+            if (diffChoice == 0) {
+                gameDifficulty = Difficulty::EASY;
+                aiStrategy = std::make_unique<RandomAttackStrategy>(); // SETARE STRATEGIE
+            } else if (diffChoice == 2) {
+                gameDifficulty = Difficulty::ADVANCED;
+                aiStrategy = std::make_unique<HuntAttackStrategy>(); // SETARE STRATEGIE
+            } else {
+                gameDifficulty = Difficulty::MEDIUM;
+                aiStrategy = std::make_unique<RandomAttackStrategy>(); // SETARE STRATEGIE
+            }
             dificultateValida = true;
         }
     } while (!dificultateValida);
 
-    // 2. Validare Meniu Tip Flotă
     int chosenType = 1;
     bool tipFlotaValid = false;
     do {
@@ -508,7 +480,6 @@ void Game::setupPlayerBoard() {
         }
     } while (!tipFlotaValid);
 
-    // 3. Validare Plasare Avioane
     int count = 0;
     while (count < 3) {
         std::cout << "Avion " << count + 1 << " - Introdu Capul (x y) si Directia (0:N, 1:S, 2:E, 3:W): ";
@@ -521,63 +492,41 @@ void Game::setupPlayerBoard() {
         }
 
         if (x < 0 || x >= 10 || y < 0 || y >= 10) {
-            std::cout << ">>> Coordonate in afara hartii! Introdu numere intre 0 si 9 pentru x si y.\n\n";
+            std::cout << ">>> Coordonate in afara hartii!\n\n";
             continue;
         }
 
         if (d < 0 || d > 3) {
-            std::cout << ">>> Directie invalida! Introdu un numar intre 0 si 3.\n\n";
+            std::cout << ">>> Directie invalida!\n\n";
             continue;
         }
 
         auto dir = static_cast<Direction>(d);
-        std::unique_ptr<Aeroplane> a = nullptr;
-
-        if (chosenType == 0) a = std::make_unique<InterceptorPlane>(Point(x, y), dir);
-        else if (chosenType == 1) a = std::make_unique<BomberPlane>(Point(x, y), dir);
-        else if (chosenType == 2) a = std::make_unique<RocketPlane>(Point(x, y), dir);
-        else a = std::make_unique<StealthPlane>(Point(x, y), dir);
+        std::unique_ptr<Aeroplane> a = PlaneFactory::createPlane(chosenType, Point(x, y), dir);
 
         if (playerBoard.addPlane(std::move(a))) {
             std::cout << "Avion plasat cu succes!\n\n";
             count++;
         } else {
-            std::cout << ">>> Pozitie invalida! Avionul iese din harta sau se suprapune cu altul.\n\n";
+            std::cout << ">>> Pozitie invalida!\n\n";
         }
     }
     setupAIBoard(chosenType);
 }
 
-// Bucla principală a bătăliei tactice (Consola)
 void Game::startBattle() {
     std::cout << "\n=== START " << projectName << " ===\n";
     std::cout << "=========================================================================\n";
-    std::cout << "                        LEGENDA SI REGULI DE JOC                         \n";
-    std::cout << "=========================================================================\n";
-    std::cout << "[NIVELURI DE DIFICULTATE]:\n";
-    std::cout << "  0. EASY     - Cand dobori un avion inamic, toate celulele avionului doborat sunt\n";
-    std::cout << "                hasurate doborat sunt hasurate. Inamicul trage random.\n";
-    std::cout << "  1. MEDIUM   - Mod Clasic. Cand dobori un cap, vezi doar simbolic '!',\n";
-    std::cout << "                dar corpul ramane ascuns.Inamicul trage random.\n";
-    std::cout << "  2. ADVANCED - Mod Expert. Inamicul devine inteligent si intra in 'Hunting\n";
-    std::cout << "                Mode' (vaneaza celulele vecine daca te-a lovit).\n\n";
     std::cout << "[SIMBOLURI HARTA]:\n";
     std::cout << "  ~ : Celula neatacata             O : MISS\n";
     std::cout << "  X : Corp avion lovit             ! : CAP AVION DOBORAT\n";
-    std::cout << "  # : Corp descoperit automat (Disponibil doar pe modul EASY)\n\n";
-    std::cout << "[TIPURI DE AVIOANE DISPONIBILE]:\n";
-    std::cout << "  * Interceptor (Tip 0) -> Clasic, are forma clasica de cruce, 6 celule in total.\n";
-    std::cout << "  * Bombardier  (Tip 1) -> Masiv, 5 celule pt aripi, 3 pentru coada.\n";
-    std::cout << "  * Racheta     (Tip 2) -> Linie dreapta de 4 celule.\n";
-    std::cout << "  * Stealth     (Tip 3) -> Forma aerodinamica de sageata(4 celule).\n";
     std::cout << "=========================================================================\n\n";
 
     if (Aeroplane::getTotalPlanesCreated() != 6) {
-        throw FlotillaIncompleteException("Numarul total de avioane din memorie este invalid! Jocul nu poate incepe.");
+        throw FlotillaIncompleteException("Numarul total de avioane din memorie este invalid!");
     }
 
     while (playerPlanesAlive > 0 && aiPlanesAlive > 0) {
-        // Afișăm tablele apelând metodele high-level din Board
         std::cout << "\nTABLA TA (Avioanele tale):\n";
         playerBoard.printBoard(false);
         std::cout << "Avioane proprii ramase: " << playerPlanesAlive << "\n";
@@ -586,115 +535,63 @@ void Game::startBattle() {
         aiBoard.printBoard(true);
         std::cout << "Avioane inamice detectate: " << aiPlanesAlive << "\n";
 
-        // --- RÂNDUL JUCĂTORULUI ---
         int tx, ty;
         bool validTurn = false;
         do {
             std::cout << "\nRANDUL TAU! Unde ataci? (x y): ";
 
-            // Validare curată: afișăm mesajul și dăm 'continue' ca să reia bucla
             if (!(std::cin >> tx >> ty) || tx < 0 || tx >= 10 || ty < 0 || ty >= 10) {
-                std::cout << ">>> Coordonate invalide! Trebuie sa introduci numere intre 0 si 9.\n";
+                std::cout << ">>> Coordonate invalide!\n";
                 clearInput();
-                continue; // Reia do-while de la capăt, nu mai aruncă nicio excepție!
-            }
-
-            // Verificăm dacă celula a fost deja atacată
-            if (aiBoard.isCellAlreadyAttacked(Point(tx, ty))) {
-                std::cout << ">>> Ai tras deja in aceasta casuta! Alege o celula neatacata.\n";
                 continue;
             }
 
-            // Dacă codul a trecut de validări, tragem!
+            if (aiBoard.isCellAlreadyAttacked(Point(tx, ty))) {
+                std::cout << ">>> Ai tras deja in aceasta casuta!\n";
+                continue;
+            }
+
             char res = aiBoard.attackCell(Point(tx, ty));
 
             if (res == 'X') {
                 std::cout << ">>> Lovit in corp!\n";
             } else if (res == 'O') {
-                std::cout << ">>> Miss. Mai incearca tura urmatoare.\n";
+                std::cout << ">>> Miss.\n";
             } else if (res == 'B' || res == '!') {
-                std::cout << ">>> CAP! Ai doborat un avion ";
+                std::cout << ">>> CAP! Ai doborat un avion inamic.\n";
                 aiPlanesAlive--;
-
-                // RAPORT RADAR DYNAMIC_CAST - DOAR PE MODUL EASY
-                if (res == 'B') std::cout << "BOMBARDIER inamic.\n";
-                else std::cout << "inamic.\n";
             }
 
-            validTurn = true; // Tura s-a terminat cu succes, ieșim din do-while
+            validTurn = true;
         } while (!validTurn);
 
         if (aiPlanesAlive == 0) {
-            std::cout << "\nVICTORIE! Ai distrus toate cele 3 avioane inamice! Felicitari!\n";
+            std::cout << "\nVICTORIE! Ai distrus toate cele 3 avioane inamice!\n";
             break;
         }
 
-        // --- RÂNDUL AI-ULUI ---
-        std::cout << "\nRandul inamicului...";
-        Point aiMove;
-        int safetyCounter = 0; // Contor de siguranță anti-buclă infinită
+        // --- SHABLONUL STRATEGY IN ACTIUNE ---
+        std::cout << "\nRandul inamicului... ";
 
-        do {
-            if (gameDifficulty == Difficulty::ADVANCED && huntingMode && !targetsToTry.empty()) {
-                aiMove = targetsToTry.back();
-                targetsToTry.pop_back();
-            } else {
-                aiMove = Point(rand() % 10, rand() % 10);
-            }
-
-            safetyCounter++;
-
-            // Dacă a încercat de prea multe ori la rând și nu a nimerit o celulă liberă
-            if (safetyCounter > 50) {
-                // Căutăm prima celulă neatacată de la (0,0) la (9,9)
-                bool foundBackup = false;
-                for (int i = 0; i < 10 && !foundBackup; ++i) {
-                    for (int j = 0; j < 10; ++j) {
-                        if (!playerBoard.isCellAlreadyAttacked(Point(i, j))) {
-                            aiMove = Point(i, j);
-                            foundBackup = true;
-                            break;
-                        }
-                    }
-                }
-                break;
-            }
-        } while (playerBoard.isCellAlreadyAttacked(aiMove));
+        Point aiMove = aiStrategy->getNextMove(playerBoard);
         char aiRes = playerBoard.attackCell(aiMove);
-        std::cout << "A tras la coordonatele " << aiMove << ": ";
+        aiStrategy->updateState(aiMove, aiRes); // AI-ul isi aminteste lovitura
+
+        std::cout << "A tras la " << aiMove << ": ";
+
         if (aiRes == 'X') {
             std::cout << "Ti-a lovit un avion in corp!\n";
-            if (gameDifficulty == Difficulty::ADVANCED) {
-                huntingMode = true;
-                int x = aiMove.getX();
-                int y = aiMove.getY();
-
-                const int dx[] = {-1, 1, 0, 0};
-                const int dy[] = {0, 0, -1, 1};
-
-                for (int i = 0; i < 4; ++i) {
-                    int nx = x + dx[i];
-                    int ny = y + dy[i];
-
-                    if (nx >= 0 && nx < 10 && ny >= 0 && ny < 10) {
-                        targetsToTry.emplace_back(nx, ny);
-                    }
-                }
-            }
-        } else if (aiRes == '!') {
+        } else if (aiRes == '!' || aiRes == 'B') {
             std::cout << "CRITICAL! Ti-a doborat un avion complet!\n";
             playerPlanesAlive--;
-            if (gameDifficulty == Difficulty::ADVANCED) {
-                huntingMode = false;
-                targetsToTry.clear();
-            }
         } else {
-            std::cout << "A ratat .\n";
+            std::cout << "A ratat.\n";
         }
 
         if (playerPlanesAlive == 0) {
-            std::cout << "\nAi pierdut! Toate avioanele tale au fost doborate de inamic.\n";
+            std::cout << "\nAi pierdut! Toate avioanele tale au fost doborate.\n";
             return;
         }
+        // -------------------------------------
     }
 }
