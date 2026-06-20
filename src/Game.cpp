@@ -139,8 +139,7 @@ void Game::runGUI() {
                 if (currentState == GameState::PLACEMENT) {
                     if (event.key.code == sf::Keyboard::Right) currentDir = rotateRight(currentDir);
                     else if (event.key.code == sf::Keyboard::Left) currentDir = rotateLeft(currentDir);
-                }
-                else if (currentState == GameState::GAME_OVER) {
+                } else if (currentState == GameState::GAME_OVER) {
                     if (event.key.code == sf::Keyboard::Enter) {
                         window.close();
                     }
@@ -178,8 +177,8 @@ void Game::runGUI() {
                     }
                 } else if (currentState == GameState::PLACEMENT) {
                     if (hoverRow >= 0 && hoverRow < gridSize && hoverCol >= 0 && hoverCol < gridSize) {
-
-                        std::unique_ptr<Aeroplane> newPlane = PlaneFactory::createPlane(chosenFleetType, Point(hoverRow, hoverCol), currentDir);
+                        std::unique_ptr<Aeroplane> newPlane = PlaneFactory::createPlane(
+                            chosenFleetType, Point(hoverRow, hoverCol), currentDir);
 
                         if (playerBoard.addPlane(std::move(newPlane))) {
                             auto cells = getPlaneCellsLocal(chosenFleetType, hoverRow, hoverCol, currentDir);
@@ -246,7 +245,9 @@ void Game::runGUI() {
                                 Point aiMove = aiStrategy->getNextMove(playerBoard);
                                 char aiRes = playerBoard.attackCell(aiMove);
 
-                                visualPlayerGrid[aiMove.getX()][aiMove.getY()] = (aiRes == 'B' || aiRes == '!') ? '!' : aiRes;
+                                visualPlayerGrid[aiMove.getX()][aiMove.getY()] = (aiRes == 'B' || aiRes == '!')
+                                        ? '!'
+                                        : aiRes;
 
                                 aiStrategy->updateState(aiMove, aiRes);
 

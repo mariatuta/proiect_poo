@@ -86,6 +86,7 @@ private:
 
     // Funcții utilitare interne privatizate
     static void clearInput();
+
     void setupAIBoard(int typeChoice);
 
     // Funcții utilitare noi pentru grafică
