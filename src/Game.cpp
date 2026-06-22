@@ -103,8 +103,8 @@ void Game::runGUI() {
     srand(static_cast<unsigned>(time(nullptr)));
 
     sf::Font font;
-    if (!font.loadFromFile("C:/Windows/Fonts/arial.ttf")) {
-        std::cout << ">>> ERROR: Cannot load arial.ttf from Windows/Fonts!\n";
+    if (!font.loadFromFile("assets/arial.ttf")) {
+        std::cout << ">>> ERROR: Cannot load arial.ttf din folderul assets!\n";
     }
 
     currentState = GameState::DIFFICULTY;
@@ -295,6 +295,19 @@ void Game::runGUI() {
                 btnText.setPosition(200.f + i * 225.f + 30.f, 275.f);
                 window.draw(btnText);
             }
+            sf::Text descText;
+            descText.setFont(font);
+            descText.setCharacterSize(14); // Font mic, discret
+            descText.setFillColor(sf::Color(120, 120, 130)); // Culoare gri șters, să nu deranjeze vizual
+
+            std::string descriptions =
+                "* EASY: Enemy attacks randomly. Destroyed planes are fully revealed on radar.\n\n"
+                "* MEDIUM: Classic mode. Enemy attacks randomly. Destroyed planes remain hidden.\n\n"
+                "* ADVANCED: Smart opponent. Enters Hunting Mode to target adjacent cells after a hit.";
+
+            descText.setString(descriptions);
+            descText.setPosition(180.f, 430.f); // Poziționat jos, frumos aliniat sub butoane
+            window.draw(descText);
         } else if (currentState == GameState::SELECTION) {
             titleText.setString("CHOOSE YOUR FLEET TYPE");
             titleText.setPosition(320.f, 80.f);

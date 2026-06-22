@@ -12,7 +12,7 @@ public:
     virtual ~AIAttackStrategy() = default;
 
     // Metoda pentru a gasi urmatoarea miscare
-    virtual Point getNextMove(const Board& playerBoard) = 0;
+    virtual Point getNextMove(const Board &playerBoard) = 0;
 
     // Metoda prin care AI-ul afla daca a lovit sau a ratat (ca sa invete)
     virtual void updateState(Point lastMove, char result) = 0;
@@ -21,7 +21,7 @@ public:
 // 2. Strategia "Oarba" (Trage random - folosita pt EASY si MEDIUM)
 class RandomAttackStrategy : public AIAttackStrategy {
 public:
-    Point getNextMove(const Board& playerBoard) override {
+    Point getNextMove(const Board &playerBoard) override {
         Point aiMove;
         int safetyCounter = 0;
         do {
@@ -51,7 +51,7 @@ private:
     std::vector<Point> targetsToTry;
     bool huntingMode = false;
 public:
-    Point getNextMove(const Board& playerBoard) override {
+    Point getNextMove(const Board &playerBoard) override {
         Point aiMove;
         int safetyCounter = 0;
         do {
