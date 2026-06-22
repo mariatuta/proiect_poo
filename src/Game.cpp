@@ -301,9 +301,9 @@ void Game::runGUI() {
             descText.setFillColor(sf::Color(120, 120, 130)); // Culoare gri șters, să nu deranjeze vizual
 
             std::string descriptions =
-                "* EASY: Enemy attacks randomly. Destroyed planes are fully revealed on radar.\n\n"
-                "* MEDIUM: Classic mode. Enemy attacks randomly. Destroyed planes remain hidden.\n\n"
-                "* ADVANCED: Smart opponent. Enters Hunting Mode to target adjacent cells after a hit.";
+                    "* EASY: Enemy attacks randomly. Destroyed planes are fully revealed on radar.\n\n"
+                    "* MEDIUM: Classic mode. Enemy attacks randomly. Destroyed planes remain hidden.\n\n"
+                    "* ADVANCED: Smart opponent. Enters Hunting Mode to target adjacent cells after a hit.";
 
             descText.setString(descriptions);
             descText.setPosition(180.f, 430.f); // Poziționat jos, frumos aliniat sub butoane
